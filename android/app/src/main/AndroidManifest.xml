@@ -25,10 +25,12 @@
         android:theme="@style/Theme.ShieldMesh"
         tools:targetApi="34">
 
+        <!-- Pollinet BLE Service — uncomment when SDK is available
         <service
             android:name="xyz.pollinet.sdk.BleService"
             android:foregroundServiceType="connectedDevice"
             android:exported="false" />
+        -->
 
         <activity
             android:name=".MainActivity"

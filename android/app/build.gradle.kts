@@ -99,8 +99,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
     // Pollinet mesh networking SDK
-    // TODO: Update "1.0.0" to the actual release tag from JitPack
-    implementation("com.github.pollinet:pollinet-android:1.0.0")
+    // SDK not yet published to JitPack — using simulation wrapper
+    // When available: implementation("com.github.pollinet:pollinet-android:TAG")
 
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

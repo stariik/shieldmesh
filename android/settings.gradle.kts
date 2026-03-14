@@ -11,7 +11,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") }
+        // JitPack for Pollinet SDK (when published)
+        // maven { url = uri("https://jitpack.io") }
     }
 }
 

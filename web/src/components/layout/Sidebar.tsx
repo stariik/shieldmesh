@@ -117,7 +117,19 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-[#1a1a2e]">
+      <div className="p-4 border-t border-[#1a1a2e] space-y-3">
+        <a
+          href="/ShieldMesh.apk"
+          download
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#00ff88]/15 to-[#00d4ff]/15 border border-[#00ff88]/25 text-[#00ff88] text-xs font-medium hover:border-[#00ff88]/50 hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-y-0.5 transition-transform">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download Mobile App
+        </a>
         <div className="flex items-center gap-2 text-xs text-gray-600">
           <div className="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_6px_#00ff88]" />
           <span>Network Active</span>

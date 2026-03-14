@@ -103,16 +103,38 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Link
-          href="/scan"
-          className="bg-gradient-to-br from-[#00ff88]/10 to-[#00d4ff]/10 border border-[#00ff88]/20 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:border-[#00ff88]/40 transition-all group"
-        >
-          <div className="w-14 h-14 rounded-2xl bg-[#00ff88]/15 flex items-center justify-center mb-4 group-hover:animate-glow-pulse">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
-          </div>
-          <h3 className="text-white font-semibold mb-1">Quick Scan</h3>
-          <p className="text-xs text-gray-500">Analyze a URL or message for threats</p>
-        </Link>
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/scan"
+            className="flex-1 bg-gradient-to-br from-[#00ff88]/10 to-[#00d4ff]/10 border border-[#00ff88]/20 rounded-xl p-5 flex items-center gap-4 hover:border-[#00ff88]/40 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-[#00ff88]/15 flex items-center justify-center shrink-0 group-hover:animate-glow-pulse">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-sm">Quick Scan</h3>
+              <p className="text-xs text-gray-500">Analyze a URL or message for threats</p>
+            </div>
+          </Link>
+
+          <a
+            href="/ShieldMesh.apk"
+            download
+            className="flex-1 bg-gradient-to-br from-[#00d4ff]/10 to-[#9945FF]/10 border border-[#00d4ff]/20 rounded-xl p-5 flex items-center gap-4 hover:border-[#00d4ff]/40 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-[#00d4ff]/15 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-sm">Download Mobile App</h3>
+              <p className="text-xs text-gray-500">Get ShieldMesh on Android</p>
+            </div>
+          </a>
+        </div>
       </div>
 
       <div>

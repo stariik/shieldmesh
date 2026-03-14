@@ -12,7 +12,7 @@ export default function ClientShell({ children }: { children: ReactNode }) {
       <WalletSyncProvider />
       <Sidebar />
       <Header />
-      <main className="ml-64 mt-16 min-h-[calc(100vh-4rem)] p-8">
+      <main className="lg:ml-64 mt-14 lg:mt-16 min-h-[calc(100vh-3.5rem)] lg:min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8">
         {children}
       </main>
     </WalletProvider>

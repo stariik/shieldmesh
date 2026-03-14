@@ -91,7 +91,7 @@ export default function StakePanel() {
         )}
       </h3>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-[#0a0a0f] rounded-lg p-3 border border-[#1a1a2e]">
           <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Pool Balance</div>
           <div className="text-lg font-bold text-[#00d4ff] font-mono">{poolBalance.toLocaleString()}</div>

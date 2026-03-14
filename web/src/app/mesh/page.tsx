@@ -16,7 +16,7 @@ export default function MeshPage() {
 
       <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-6">
         <h3 className="text-sm text-gray-400 uppercase tracking-wider font-mono mb-4">Network Activity</h3>
-        <div className="grid grid-cols-12 gap-1 h-32">
+        <div className="grid grid-cols-12 sm:grid-cols-12 gap-0.5 sm:gap-1 h-24 sm:h-32 overflow-hidden">
           {Array.from({ length: 48 }).map((_, i) => {
             const height = Math.random() * 80 + 20;
             const isRecent = i > 40;

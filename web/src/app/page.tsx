@@ -76,9 +76,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
             <span className="text-sm text-gray-400 uppercase tracking-wider font-mono">Threat Overview</span>
-            <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
               <span className="text-red-400">{critical} critical</span>
               <span className="text-yellow-400">{pending} pending</span>
               <span className="text-cyan-400">{verified} verified</span>

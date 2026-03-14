@@ -62,7 +62,7 @@ export default function ThreatCard({ threat }: { threat: Threat }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-[#1a1a2e]">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 pt-3 border-t border-[#1a1a2e]">
         <div className="flex items-center gap-3">
           <span className="font-mono flex items-center gap-1">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -70,7 +70,7 @@ export default function ThreatCard({ threat }: { threat: Threat }) {
           </span>
           <span className="font-mono">#{threat.id}</span>
         </div>
-        <span className="font-mono text-[10px] text-gray-600 truncate max-w-[180px]" title={threat.hash}>
+        <span className="font-mono text-[10px] text-gray-600 truncate max-w-[120px] sm:max-w-[180px]" title={threat.hash}>
           {threat.hash.slice(0, 8)}...{threat.hash.slice(-8)}
         </span>
       </div>

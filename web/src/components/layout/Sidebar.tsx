@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSidebarStore } from "@/store/sidebarStore";
 
 const navItems = [
   {
@@ -77,65 +78,91 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isOpen, close } = useSidebarStore();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#0d0d14] border-r border-[#1a1a2e] flex flex-col z-50">
-      <div className="p-6 border-b border-[#1a1a2e]">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#00ff88] to-[#00d4ff] flex items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <>
+      {/* Backdrop overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          onClick={close}
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 h-screen w-64 bg-[#0d0d14] border-r border-[#1a1a2e] flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
+        <div className="p-6 border-b border-[#1a1a2e] flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3" onClick={close}>
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#00ff88] to-[#00d4ff] flex items-center justify-center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <div>
+              <span className="text-lg font-bold text-white tracking-wide">Shield</span>
+              <span className="text-lg font-bold text-[#00ff88] tracking-wide">Mesh</span>
+              <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] -mt-1">Threat Intelligence</div>
+            </div>
+          </Link>
+          {/* Close button for mobile */}
+          <button
+            onClick={close}
+            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-          </div>
-          <div>
-            <span className="text-lg font-bold text-white tracking-wide">Shield</span>
-            <span className="text-lg font-bold text-[#00ff88] tracking-wide">Mesh</span>
-            <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] -mt-1">Threat Intelligence</div>
-          </div>
-        </Link>
-      </div>
-
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20 shadow-[0_0_15px_rgba(0,255,136,0.05)]"
-                  : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              <span className={isActive ? "text-[#00ff88]" : "text-gray-500"}>
-                {item.icon}
-              </span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="p-4 border-t border-[#1a1a2e] space-y-3">
-        <a
-          href="/ShieldMesh.apk"
-          download
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#00ff88]/15 to-[#00d4ff]/15 border border-[#00ff88]/25 text-[#00ff88] text-xs font-medium hover:border-[#00ff88]/50 hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-y-0.5 transition-transform">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Download Mobile App
-        </a>
-        <div className="flex items-center gap-2 text-xs text-gray-600">
-          <div className="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_6px_#00ff88]" />
-          <span>Network Active</span>
+          </button>
         </div>
-        <div className="text-[10px] text-gray-700 mt-1 font-mono">v0.1.0-alpha // devnet</div>
-      </div>
-    </aside>
+
+        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={close}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20 shadow-[0_0_15px_rgba(0,255,136,0.05)]"
+                    : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
+                }`}
+              >
+                <span className={isActive ? "text-[#00ff88]" : "text-gray-500"}>
+                  {item.icon}
+                </span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-[#1a1a2e] space-y-3">
+          <a
+            href="/ShieldMesh.apk"
+            download
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#00ff88]/15 to-[#00d4ff]/15 border border-[#00ff88]/25 text-[#00ff88] text-xs font-medium hover:border-[#00ff88]/50 hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-y-0.5 transition-transform">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download Mobile App
+          </a>
+          <div className="flex items-center gap-2 text-xs text-gray-600">
+            <div className="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_6px_#00ff88]" />
+            <span>Network Active</span>
+          </div>
+          <div className="text-[10px] text-gray-700 mt-1 font-mono">v0.1.0-alpha // devnet</div>
+        </div>
+      </aside>
+    </>
   );
 }

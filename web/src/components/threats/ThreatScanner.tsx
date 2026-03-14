@@ -147,7 +147,7 @@ export default function ThreatScanner() {
         <label className="block text-sm text-gray-400 mb-2 font-mono">
           Paste URL or message to scan
         </label>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={input}
@@ -159,7 +159,7 @@ export default function ThreatScanner() {
           <button
             onClick={runScan}
             disabled={scanning || !input.trim()}
-            className="px-6 py-3 bg-gradient-to-r from-[#00ff88] to-[#00d4ff] text-[#0a0a0f] font-bold text-sm rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,255,136,0.15)]"
+            className="px-6 py-3 bg-gradient-to-r from-[#00ff88] to-[#00d4ff] text-[#0a0a0f] font-bold text-sm rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,255,136,0.15)] shrink-0"
           >
             {scanning ? "Scanning..." : "Scan"}
           </button>
@@ -307,7 +307,7 @@ export default function ThreatScanner() {
           )}
 
           {/* Action buttons */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
             <button
               onClick={handleReport}
               disabled={reported || chainReporting}

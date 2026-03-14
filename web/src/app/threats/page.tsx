@@ -48,10 +48,10 @@ export default function ThreatsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-wrap items-center gap-6">
+      <div className="flex flex-wrap items-start gap-4 sm:gap-6">
         <div className="space-y-1">
           <span className="text-[10px] text-gray-600 uppercase tracking-wider block">Status</span>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {filterBtn("All", statusFilter === "ALL", () => setStatusFilter("ALL"))}
             {filterBtn("Pending", statusFilter === "PENDING", () => setStatusFilter("PENDING"))}
             {filterBtn("Verified", statusFilter === "VERIFIED", () => setStatusFilter("VERIFIED"))}
@@ -60,7 +60,7 @@ export default function ThreatsPage() {
         </div>
         <div className="space-y-1">
           <span className="text-[10px] text-gray-600 uppercase tracking-wider block">Severity</span>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {filterBtn("All", severityFilter === "ALL", () => setSeverityFilter("ALL"))}
             {filterBtn("Critical", severityFilter === "CRITICAL", () => setSeverityFilter("CRITICAL"))}
             {filterBtn("High", severityFilter === "HIGH", () => setSeverityFilter("HIGH"))}
@@ -70,7 +70,7 @@ export default function ThreatsPage() {
         </div>
         <div className="space-y-1">
           <span className="text-[10px] text-gray-600 uppercase tracking-wider block">Sort</span>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {filterBtn("Time", sortBy === "time", () => setSortBy("time"))}
             {filterBtn("Severity", sortBy === "severity", () => setSortBy("severity"))}
             {filterBtn("AI Score", sortBy === "score", () => setSortBy("score"))}

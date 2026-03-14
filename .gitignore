@@ -1,0 +1,38 @@
+# Anchor / Solana
+.anchor
+target
+**/*.rs.bk
+test-ledger
+.yarn
+
+# Dependencies
+node_modules
+web/node_modules/
+
+# Next.js
+web/.next/
+web/out/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# PDF
+*.pdf

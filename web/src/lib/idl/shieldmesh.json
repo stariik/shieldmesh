@@ -1,0 +1,835 @@
+{
+  "address": "DKcRE94UZtL18AVrDMJHviw5pUHp5L9xr11Q1njvUmvK",
+  "metadata": {
+    "name": "shieldmesh",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "claim_bounty",
+      "discriminator": [
+        225,
+        157,
+        163,
+        238,
+        239,
+        169,
+        75,
+        226
+      ],
+      "accounts": [
+        {
+          "name": "reporter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.authority",
+                "account": "StakingPool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "threat",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  104,
+                  114,
+                  101,
+                  97,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "threat.threat_hash",
+                "account": "ThreatAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bounty",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  117,
+                  110,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "threat"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_pool",
+      "discriminator": [
+        95,
+        180,
+        10,
+        172,
+        84,
+        174,
+        232,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reward_rates",
+          "type": {
+            "array": [
+              "u64",
+              4
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "report_threat",
+      "discriminator": [
+        248,
+        73,
+        90,
+        46,
+        239,
+        83,
+        2,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "reporter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.authority",
+                "account": "StakingPool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "threat",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  104,
+                  114,
+                  101,
+                  97,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "arg",
+                "path": "threat_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bounty",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  117,
+                  110,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "threat"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "threat_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "severity",
+          "type": "u8"
+        },
+        {
+          "name": "ai_score",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "stake",
+      "discriminator": [
+        206,
+        176,
+        202,
+        18,
+        200,
+        209,
+        179,
+        108
+      ],
+      "accounts": [
+        {
+          "name": "staker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.authority",
+                "account": "StakingPool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "unstake",
+      "discriminator": [
+        90,
+        95,
+        107,
+        42,
+        205,
+        124,
+        50,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "staker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.authority",
+                "account": "StakingPool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "verify_threat",
+      "discriminator": [
+        197,
+        38,
+        65,
+        206,
+        39,
+        213,
+        153,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "validator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.authority",
+                "account": "StakingPool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "threat",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  104,
+                  114,
+                  101,
+                  97,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "threat.threat_hash",
+                "account": "ThreatAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "validator"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BountyAccount",
+      "discriminator": [
+        79,
+        173,
+        237,
+        26,
+        118,
+        105,
+        127,
+        194
+      ]
+    },
+    {
+      "name": "StakerAccount",
+      "discriminator": [
+        12,
+        152,
+        43,
+        218,
+        164,
+        11,
+        150,
+        174
+      ]
+    },
+    {
+      "name": "StakingPool",
+      "discriminator": [
+        203,
+        19,
+        214,
+        220,
+        220,
+        154,
+        24,
+        102
+      ]
+    },
+    {
+      "name": "ThreatAccount",
+      "discriminator": [
+        253,
+        37,
+        190,
+        240,
+        220,
+        6,
+        43,
+        56
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidSeverity",
+      "msg": "Invalid severity level. Must be 0-3."
+    },
+    {
+      "code": 6001,
+      "name": "InvalidAiScore",
+      "msg": "Invalid AI score. Must be 0-100."
+    },
+    {
+      "code": 6002,
+      "name": "InsufficientStake",
+      "msg": "Insufficient stake amount."
+    },
+    {
+      "code": 6003,
+      "name": "InsufficientValidators",
+      "msg": "Threat has not been verified by enough validators."
+    },
+    {
+      "code": 6004,
+      "name": "BountyAlreadyClaimed",
+      "msg": "Bounty has already been claimed."
+    },
+    {
+      "code": 6005,
+      "name": "ThreatNotVerified",
+      "msg": "Threat is not in verified status."
+    },
+    {
+      "code": 6006,
+      "name": "SelfVerification",
+      "msg": "Reporter cannot verify their own threat."
+    },
+    {
+      "code": 6007,
+      "name": "UnstakeExceedsBalance",
+      "msg": "Unstake amount exceeds staked balance."
+    },
+    {
+      "code": 6008,
+      "name": "InsufficientPoolBalance",
+      "msg": "Insufficient pool balance for bounty payout."
+    },
+    {
+      "code": 6009,
+      "name": "ThreatAlreadySettled",
+      "msg": "Threat has already been settled."
+    },
+    {
+      "code": 6010,
+      "name": "Unauthorized",
+      "msg": "Only the pool authority can perform this action."
+    }
+  ],
+  "types": [
+    {
+      "name": "BountyAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reporter",
+            "type": "pubkey"
+          },
+          {
+            "name": "threat",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakerAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "reputation",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakingPool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          },
+          {
+            "name": "staker_count",
+            "type": "u32"
+          },
+          {
+            "name": "reward_rates",
+            "docs": [
+              "Reward rates in lamports for severity levels: [LOW, MEDIUM, HIGH, CRITICAL]"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ThreatAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reporter",
+            "type": "pubkey"
+          },
+          {
+            "name": "threat_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "severity",
+            "type": "u8"
+          },
+          {
+            "name": "ai_score",
+            "type": "u8"
+          },
+          {
+            "name": "validator_count",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "0 = PENDING, 1 = VERIFIED, 2 = SETTLED"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

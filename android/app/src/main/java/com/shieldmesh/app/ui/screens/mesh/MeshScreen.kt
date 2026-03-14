@@ -14,15 +14,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CellTower
 import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.SendAndArchive
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -63,6 +69,10 @@ fun MeshScreen(
 ) {
     val meshStatus by viewModel.meshStatus.collectAsState()
     val messages by viewModel.peerMessages.collectAsState()
+    val meshMetrics by viewModel.meshMetrics.collectAsState()
+    val outboundQueue by viewModel.outboundQueueSize.collectAsState()
+    val receivedQueue by viewModel.receivedQueueSize.collectAsState()
+    val isInitialized by viewModel.isInitialized.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -128,7 +138,7 @@ fun MeshScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Stats grid
+                    // Stats grid - row 1
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -136,21 +146,65 @@ fun MeshScreen(
                         MeshStatItem(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.People,
-                            value = meshStatus.peersConnected.toString(),
+                            value = meshMetrics.peersConnected.toString(),
                             label = "Peers",
                             color = CyanAccent
                         )
                         MeshStatItem(
                             modifier = Modifier.weight(1f),
-                            icon = Icons.Default.SendAndArchive,
-                            value = meshStatus.threatsRelayed.toString(),
-                            label = "Relayed",
+                            icon = Icons.Default.Route,
+                            value = meshMetrics.messagesRouted.toString(),
+                            label = "Routed",
                             color = GreenAccent
                         )
                     }
 
-                    if (meshStatus.lastSyncTimestamp > 0) {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Stats grid - row 2: queue sizes
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        MeshStatItem(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.Outbox,
+                            value = outboundQueue.toString(),
+                            label = "Outbound",
+                            color = MediumYellow
+                        )
+                        MeshStatItem(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.Inbox,
+                            value = receivedQueue.toString(),
+                            label = "Received",
+                            color = CyanAccent
+                        )
+                    }
+
+                    if (meshMetrics.uptime > 0) {
                         Spacer(modifier = Modifier.height(12.dp))
+                        val uptimeMinutes = meshMetrics.uptime / 60
+                        val uptimeSeconds = meshMetrics.uptime % 60
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Timer,
+                                contentDescription = null,
+                                tint = TextMuted,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Uptime: ${uptimeMinutes}m ${uptimeSeconds}s",
+                                color = TextMuted,
+                                fontFamily = MonospaceFamily,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+
+                    if (meshStatus.lastSyncTimestamp > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
                         val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                         Text(
                             text = "Last sync: ${dateFormat.format(Date(meshStatus.lastSyncTimestamp))}",
@@ -190,12 +244,19 @@ fun MeshScreen(
                         }
 
                         OutlinedButton(
-                            onClick = { viewModel.simulatePeers() },
+                            onClick = { viewModel.refreshMetrics() },
                             modifier = Modifier.weight(1f),
                             border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.5f)),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Simulate", color = CyanAccent, fontWeight = FontWeight.Bold)
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = null,
+                                tint = CyanAccent,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Refresh", color = CyanAccent, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -221,8 +282,8 @@ fun MeshScreen(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.Bluetooth,
                     name = "BLE",
-                    status = "Ready",
-                    statusColor = MediumYellow
+                    status = if (isInitialized) "Active" else "Ready",
+                    statusColor = if (isInitialized) GreenAccent else MediumYellow
                 )
                 ConnectionMethodCard(
                     modifier = Modifier.weight(1f),
@@ -266,11 +327,45 @@ fun MeshScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Pollinet SDK integration pending -- using stub implementation.",
-                        color = MediumYellow,
+                        text = if (isInitialized) "Pollinet SDK active -- BLE mesh operational."
+                               else "Pollinet SDK ready -- tap Start Mesh to connect.",
+                        color = if (isInitialized) GreenAccent else MediumYellow,
                         fontFamily = MonospaceFamily,
                         fontSize = 10.sp
                     )
+                }
+            }
+        }
+
+        // Peer messages log
+        if (messages.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Activity Log",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = CardBackground),
+                    border = BorderStroke(1.dp, CardBorder),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        messages.takeLast(10).reversed().forEach { message ->
+                            Text(
+                                text = message,
+                                color = TextSecondary,
+                                fontFamily = MonospaceFamily,
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
             }
         }

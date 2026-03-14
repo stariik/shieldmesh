@@ -9,6 +9,7 @@ import com.shieldmesh.app.data.local.AppDatabase
 import com.shieldmesh.app.data.local.dao.BountyDao
 import com.shieldmesh.app.data.local.dao.StakerDao
 import com.shieldmesh.app.data.local.dao.ThreatDao
+import com.shieldmesh.app.mesh.PollinetManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,5 +51,11 @@ object AppModule {
     @Singleton
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return context.dataStore
+    }
+
+    @Provides
+    @Singleton
+    fun providePollinetManager(@ApplicationContext context: Context): PollinetManager {
+        return PollinetManager(context)
     }
 }

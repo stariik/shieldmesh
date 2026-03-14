@@ -11,8 +11,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // TODO: Add JitPack for Pollinet dependency when available
-        // maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

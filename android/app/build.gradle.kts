@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.shieldmesh.app"
-        minSdk = 26
+        minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
@@ -98,8 +98,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
-    // TODO: Pollinet mesh networking dependency
-    // implementation("com.github.pollinet:pollinet-android-sdk:x.y.z")
+    // Pollinet mesh networking SDK
+    // TODO: Update "1.0.0" to the actual release tag from JitPack
+    implementation("com.github.pollinet:pollinet-android:1.0.0")
 
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

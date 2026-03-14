@@ -1,12 +1,20 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import WalletProvider from "@/providers/WalletProvider";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import WalletSyncProvider from "@/providers/WalletSyncProvider";
 
 export default function ClientShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
+
+  if (isLanding) {
+    return <>{children}</>;
+  }
+
   return (
     <WalletProvider>
       <WalletSyncProvider />

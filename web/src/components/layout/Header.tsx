@@ -6,7 +6,7 @@ import StatusBanner from "./StatusBanner";
 import { useSidebarStore } from "@/store/sidebarStore";
 
 const pageTitles: Record<string, string> = {
-  "/": "Dashboard",
+  "/dashboard": "Dashboard",
   "/scan": "Threat Scanner",
   "/threats": "Threat Feed",
   "/bounties": "Bounties",

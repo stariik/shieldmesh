@@ -55,6 +55,7 @@ import com.shieldmesh.app.ui.theme.MonospaceFamily
 import com.shieldmesh.app.ui.theme.TextMuted
 import com.shieldmesh.app.ui.theme.TextPrimary
 import com.shieldmesh.app.ui.theme.TextSecondary
+import com.shieldmesh.app.sync.ConnectivityStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,6 +70,8 @@ fun DashboardScreen(
     val poolBalance by viewModel.poolBalance.collectAsState()
     val meshPeers by viewModel.meshPeers.collectAsState()
     val recentThreats by viewModel.recentThreats.collectAsState()
+    val connectivity by viewModel.connectivityStatus.collectAsState()
+    val pendingSyncCount by viewModel.pendingSyncCount.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -104,6 +107,84 @@ fun DashboardScreen(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Connectivity status banner
+        if (connectivity != ConnectivityStatus.AVAILABLE) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = CriticalRed.copy(alpha = 0.1f)),
+                    border = BorderStroke(1.dp, CriticalRed.copy(alpha = 0.25f)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(CriticalRed)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Offline Mode",
+                                color = CriticalRed,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp
+                            )
+                            Text(
+                                text = "Threats queued locally. Relaying via Pollinet mesh.",
+                                color = TextMuted,
+                                fontSize = 11.sp
+                            )
+                        }
+                        if (pendingSyncCount > 0) {
+                            Text(
+                                text = "$pendingSyncCount queued",
+                                color = CriticalRed,
+                                fontFamily = MonospaceFamily,
+                                fontSize = 11.sp,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(CriticalRed.copy(alpha = 0.15f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        } else if (pendingSyncCount > 0) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MediumYellow.copy(alpha = 0.1f)),
+                    border = BorderStroke(1.dp, MediumYellow.copy(alpha = 0.25f)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(MediumYellow)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Syncing $pendingSyncCount threat${if (pendingSyncCount > 1) "s" else ""} to the network...",
+                            color = MediumYellow,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            }
         }
 
         // Stats cards row 1

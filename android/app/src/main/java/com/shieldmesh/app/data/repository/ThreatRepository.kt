@@ -26,6 +26,8 @@ class ThreatRepository @Inject constructor(
 
     fun getVerifiedCount(): Flow<Int> = threatDao.getVerifiedCount()
 
+    fun getPendingSyncCount(): Flow<Int> = threatDao.getPendingSyncCount()
+
     suspend fun getThreatById(id: String): ThreatEntity? = threatDao.getById(id)
 
     suspend fun reportThreat(

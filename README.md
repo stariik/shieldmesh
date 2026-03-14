@@ -1,9 +1,9 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Solana-9945FF?style=for-the-badge&logo=solana&logoColor=white" alt="Solana" />
   <img src="https://img.shields.io/badge/Anchor-0.32-blue?style=for-the-badge" alt="Anchor" />
-  <img src="https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Android-Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
   <img src="https://img.shields.io/badge/Pollinet-Mesh_Network-00C853?style=for-the-badge" alt="Pollinet" />
-  <img src="https://img.shields.io/badge/TensorFlow_Lite-On_Device_AI-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white" alt="TF Lite" />
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License" />
 </p>
 
@@ -39,7 +39,7 @@ The communities most vulnerable to cyber threats are the same communities least 
 
 | Capability | How |
 |---|---|
-| **Detect** | On-device AI (TensorFlow Lite) analyzes URLs, messages, and payloads for phishing, social engineering, and crypto scams — no cloud required |
+| **Detect** | On-device AI analyzes URLs, messages, and payloads for phishing, social engineering, and crypto scams — no cloud required |
 | **Relay** | Pollinet mesh networking broadcasts threat alerts device-to-device via Bluetooth/Wi-Fi Direct — no internet required |
 | **Verify** | Nearby devices independently validate threats through consensus, eliminating false positives |
 | **Reward** | Community members stake SOL into a bounty pool; verified threat reporters earn bounties settled on Solana |
@@ -62,7 +62,7 @@ The communities most vulnerable to cyber threats are the same communities least 
   +------------------+
   | On-Device AI     |       +---------------------+
   | Engine analyzes  |       |                     |
-  | (TensorFlow Lite)|       |   Pollinet Mesh     |
+  | threat patterns  |       |   Pollinet Mesh     |
   +--------+---------+       |   P2P Broadcast     |
            |                 |                     |
      Threat Detected ------->|  Device A ~~> B     |
@@ -99,22 +99,25 @@ The communities most vulnerable to cyber threats are the same communities least 
 ## Key Features
 
 ### On-Device AI Threat Detection
-TensorFlow Lite models run entirely on the user's device. Scan URLs, SMS messages, emails, and wallet addresses for phishing attempts, social engineering patterns, and crypto-specific scams. Zero cloud dependency. Zero latency.
+Pattern-matching neural engine runs entirely on the user's device. Scan URLs, SMS messages, emails, and wallet addresses for phishing attempts, social engineering patterns, and crypto-specific scams. Zero cloud dependency. Zero latency.
+
+### Pollinet Mesh Relay (Offline-First)
+Powered by **Pollinet SDK**, ShieldMesh creates ad-hoc mesh networks over Bluetooth Low Energy and Wi-Fi Direct. Threat alerts propagate device-to-device even when every cell tower and ISP in the region is down. Threats are queued locally, relayed through the mesh, and settled on-chain when any peer regains connectivity.
 
 ### Community-Staked Bounty Pool
 Stake SOL into the ShieldMesh pool. When community members detect and report verified threats, they earn bounties proportional to threat severity. Stakers fund the security of their network and share in the protocol's growth.
 
-### Offline-First Mesh Architecture
-Powered by **Pollinet SDK**, ShieldMesh creates ad-hoc mesh networks over Bluetooth and Wi-Fi Direct. Threat alerts propagate device-to-device even when every cell tower and ISP in the region is down.
-
 ### Immutable On-Chain Threat Logs
 Every verified threat — its hash, severity level, AI confidence score, reporter, and validators — is recorded permanently on Solana. This creates a transparent, community-owned threat intelligence database that anyone can audit.
 
-### Phantom Wallet Integration
-Seamless connection through Solana's Phantom wallet adapter for staking, claiming bounties, and browsing on-chain threat data.
+### Android Mobile App
+Native Kotlin app with Jetpack Compose UI, Room database for offline storage, Hilt dependency injection, and Pollinet mesh integration. The mobile app is the primary offline threat detection and relay device.
 
-### Dark Cybersecurity-Themed UI
-A purpose-built interface designed for security operators and community defenders, with real-time threat feeds, staking dashboards, and mesh network status visualization.
+### Responsive Web Dashboard
+Next.js 16 web application with landing page, dark cybersecurity-themed UI, Phantom wallet integration, and full mobile responsive layout with hamburger navigation.
+
+### APK Download
+The Android APK is available for direct download from the web dashboard, enabling quick installation without app store dependencies.
 
 ---
 
@@ -123,11 +126,13 @@ A purpose-built interface designed for security operators and community defender
 | Layer | Technology | Purpose |
 |---|---|---|
 | **Smart Contracts** | Solana + Anchor 0.32 | On-chain bounty pool, staking, threat settlement |
-| **Frontend** | Next.js 15 + Tailwind CSS 4 | Web application and dashboard |
-| **State Management** | Zustand | Client-side state across wallet, mesh, and threat data |
+| **Web Frontend** | Next.js 16 + Tailwind CSS 4 | Landing page, dashboard, and responsive web app |
+| **Android App** | Kotlin + Jetpack Compose | Native mobile app with offline-first architecture |
+| **Local Database** | Room (Android) | Offline threat storage with sync status tracking |
+| **State Management** | Zustand (Web) / StateFlow (Android) | Client-side state across wallet, mesh, and threat data |
 | **Wallet** | Solana Wallet Adapter + Phantom | User authentication and transaction signing |
-| **Mesh Networking** | Pollinet SDK | Offline P2P threat relay over Bluetooth/Wi-Fi Direct |
-| **On-Device AI** | TensorFlow Lite | Threat classification without cloud inference |
+| **Mesh Networking** | Pollinet SDK | Offline P2P threat relay over BLE/Wi-Fi Direct |
+| **DI Framework** | Hilt (Android) | Dependency injection for repositories and ViewModels |
 | **Chain** | Solana (Devnet) | Fast finality, low fees, ideal for microbounties |
 
 ---
@@ -140,16 +145,16 @@ A purpose-built interface designed for security operators and community defender
 |                                                                  |
 |  +------------------+  +------------------+  +-----------------+ |
 |  |   AI Engine      |  |   Mesh Layer     |  |   Wallet Layer  | |
-|  |   (TF Lite)      |  |   (Pollinet)     |  |   (Phantom)     | |
+|  |                  |  |   (Pollinet)     |  |   (Phantom)     | |
 |  |                  |  |                  |  |                 | |
 |  |  - URL Scanner   |  |  - BLE Broadcast |  |  - Stake SOL    | |
-|  |  - SMS Analyzer  |  |  - WiFi Direct   |  |  - Claim Bounty | |
-|  |  - Phish Detect  |  |  - Alert Relay   |  |  - View History | |
+|  |  - Phish Detect  |  |  - WiFi Direct   |  |  - Claim Bounty | |
+|  |  - Scam Patterns |  |  - Alert Relay   |  |  - View History | |
 |  +--------+---------+  +--------+---------+  +--------+--------+ |
 |           |                      |                     |          |
 |           v                      v                     v          |
 |  +-------------------------------------------------------+       |
-|  |              Zustand State Management                 |       |
+|  |     Zustand (Web) / Room + StateFlow (Android)        |       |
 |  +---------------------------+---------------------------+       |
 +------------------------------------------------------------------+
                                |
@@ -219,7 +224,8 @@ on-chain     the threat      to reporter
 - [Solana CLI](https://docs.solanalabs.com/cli/install) (v1.18+)
 - [Anchor CLI](https://www.anchor-lang.com/docs/installation) (v0.32+)
 - [Node.js](https://nodejs.org/) (v18+)
-- [Yarn](https://yarnpkg.com/)
+- [Android Studio](https://developer.android.com/studio) (for mobile app)
+- Java 17+ (for Android builds)
 
 ### 1. Clone the Repository
 
@@ -255,7 +261,53 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and connect your Phantom wallet.
+Open [http://localhost:3000](http://localhost:3000) to see the landing page, then navigate to the dashboard.
+
+### 6. Build the Android App
+
+```bash
+cd android
+./gradlew assembleDebug
+```
+
+The APK will be at `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+Alternatively, download the pre-built APK from the web dashboard.
+
+---
+
+## Project Structure
+
+```
+shieldmesh/
++-- programs/
+|   +-- shieldmesh/
+|       +-- src/
+|           +-- instructions/     # Anchor instruction handlers
+|           +-- state/            # On-chain account structures
+|           +-- errors.rs         # Custom error codes
+|           +-- lib.rs            # Program entrypoint
++-- web/                          # Next.js 16 frontend
+|   +-- src/
+|       +-- app/                  # App Router pages (landing, dashboard, scan, etc.)
+|       +-- components/           # UI components (layout, threats, bounty, mesh, wallet)
+|       +-- hooks/                # Custom hooks (useOnlineStatus, useShieldMesh, etc.)
+|       +-- store/                # Zustand stores (threat, wallet, sidebar)
+|       +-- providers/            # Context providers (Wallet, WalletSync)
+|       +-- lib/                  # Utilities (AI scanner, Solana program, IDL)
+|   +-- public/
+|       +-- ShieldMesh.apk        # Pre-built Android APK for download
++-- android/                      # Native Android app
+|   +-- app/src/main/java/com/shieldmesh/app/
+|       +-- ai/                   # On-device threat detection engine
+|       +-- data/                 # Room database, DAOs, entities, repositories
+|       +-- mesh/                 # Pollinet SDK manager and mesh networking
+|       +-- sync/                 # Connectivity observer and sync manager
+|       +-- ui/                   # Jetpack Compose screens and ViewModels
++-- tests/                        # Anchor integration tests
++-- Anchor.toml
++-- Cargo.toml
+```
 
 ---
 
@@ -265,8 +317,8 @@ ShieldMesh is built at the intersection of four competition tracks:
 
 | Track | Relevance |
 |---|---|
-| **Pollinet** | Core infrastructure — offline-first mesh networking powers the entire threat relay system. ShieldMesh is a flagship use case for Pollinet's P2P capabilities. |
-| **Scriptonia** | AI-native product development — on-device TensorFlow Lite models are central to the threat detection pipeline, not bolted on as an afterthought. |
+| **Pollinet** | Core infrastructure — offline-first mesh networking powers the entire threat relay system. ShieldMesh is a flagship use case for Pollinet's P2P capabilities. Threats are queued locally, broadcast via BLE mesh, and settled on Solana when any peer reconnects. |
+| **Scriptonia** | AI-native product development — on-device threat detection models are central to the detection pipeline, not bolted on as an afterthought. The scanner runs entirely offline. |
 | **TigerPay** | DeFi bounty marketplace — the staking pool and bounty claim system create an agentic commerce layer where threat intelligence has real monetary value. |
 | **Cybersecurity** | Core application domain — ShieldMesh exists to solve a real, unsolved problem in decentralized security for underserved communities. |
 
@@ -284,45 +336,17 @@ Solana is the only chain where this economic model works.
 
 ---
 
-## Project Structure
-
-```
-shieldmesh/
-+-- programs/
-|   +-- shieldmesh/
-|       +-- src/
-|           +-- instructions/     # Anchor instruction handlers
-|           |   +-- initialize_pool.rs
-|           |   +-- stake.rs
-|           |   +-- unstake.rs
-|           |   +-- report_threat.rs
-|           |   +-- verify_threat.rs
-|           |   +-- claim_bounty.rs
-|           +-- state/            # On-chain account structures
-|           |   +-- pool.rs       # StakingPool
-|           |   +-- threat.rs     # ThreatAccount
-|           |   +-- staker.rs     # StakerAccount
-|           |   +-- bounty.rs     # BountyAccount
-|           +-- errors.rs         # Custom error codes
-|           +-- lib.rs            # Program entrypoint
-+-- web/                          # Next.js 15 frontend
-|   +-- src/
-+-- tests/                        # Anchor integration tests
-+-- migrations/
-+-- Anchor.toml
-+-- Cargo.toml
-```
-
----
-
 ## Roadmap
 
 - [x] Anchor smart contract with staking, reporting, verification, and bounty claims
-- [x] Next.js 15 frontend with Phantom wallet integration
-- [x] Dark cybersecurity-themed UI
-- [ ] Pollinet SDK integration for offline mesh relay
-- [ ] TensorFlow Lite on-device threat classifier
-- [ ] Mobile app (React Native) with BLE mesh support
+- [x] Next.js 16 web dashboard with Phantom wallet integration
+- [x] Dark cybersecurity-themed UI with mobile responsive layout
+- [x] Landing page with product overview and APK download
+- [x] Pollinet SDK integration for offline mesh relay
+- [x] On-device AI threat detection engine
+- [x] Android app (Kotlin/Jetpack Compose) with Room DB and offline-first architecture
+- [x] Offline queue with auto-sync on reconnection
+- [x] APK download from web dashboard
 - [ ] Governance module for community-managed reward rates
 - [ ] Mainnet deployment
 

@@ -33,6 +33,9 @@ interface ThreatDao {
     @Query("SELECT COUNT(*) FROM threats WHERE status = 'verified'")
     fun getVerifiedCount(): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM threats WHERE syncStatus = 'PENDING'")
+    fun getPendingSyncCount(): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(threat: ThreatEntity)
 

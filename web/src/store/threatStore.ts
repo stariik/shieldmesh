@@ -4,6 +4,7 @@ import { sha256Hex } from "@/lib/ai-scanner";
 
 interface ThreatState {
   threats: Threat[];
+  pendingOfflineCount: number;
   addThreat: (threat: Omit<Threat, "id" | "hash" | "validatorCount" | "status" | "timestamp"> & {
     id?: string;
     hash?: string;
@@ -13,6 +14,7 @@ interface ThreatState {
   }) => void;
   updateThreat: (id: string, updates: Partial<Threat>) => void;
   getByStatus: (status: ThreatStatus) => Threat[];
+  syncPending: () => void;
 }
 
 const now = Date.now();
@@ -87,6 +89,7 @@ const mockThreats: Threat[] = [
 
 export const useThreatStore = create<ThreatState>((set, get) => ({
   threats: mockThreats,
+  pendingOfflineCount: 0,
 
   addThreat: (partial) => {
     const ts = partial.timestamp ?? Date.now();
@@ -106,7 +109,12 @@ export const useThreatStore = create<ThreatState>((set, get) => ({
       url: partial.url,
     };
 
-    set((state) => ({ threats: [threat, ...state.threats] }));
+    set((state) => ({
+      threats: [threat, ...state.threats],
+      pendingOfflineCount: threat.status === "PENDING"
+        ? state.pendingOfflineCount + 1
+        : state.pendingOfflineCount,
+    }));
   },
 
   updateThreat: (id: string, updates: Partial<Threat>) =>
@@ -118,4 +126,22 @@ export const useThreatStore = create<ThreatState>((set, get) => ({
 
   getByStatus: (status: ThreatStatus) =>
     get().threats.filter((t) => t.status === status),
+
+  syncPending: () => {
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    const pending = get().threats.filter((t) => t.status === "PENDING" && t.validatorCount === 0);
+    if (pending.length === 0) return;
+
+    // Simulate syncing: mark threats as VERIFIED after brief delay
+    pending.forEach((t, i) => {
+      setTimeout(() => {
+        set((state) => ({
+          threats: state.threats.map((th) =>
+            th.id === t.id ? { ...th, status: "VERIFIED" as ThreatStatus, validatorCount: Math.floor(Math.random() * 8) + 3 } : th
+          ),
+          pendingOfflineCount: Math.max(0, state.pendingOfflineCount - 1),
+        }));
+      }, (i + 1) * 800);
+    });
+  },
 }));

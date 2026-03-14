@@ -55,20 +55,25 @@ export default function MeshStatusComponent() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-4 sm:p-5">
           <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Connected Peers</div>
-          <div className="text-3xl font-bold text-[#00d4ff] font-mono">{status.connectedCount}</div>
-          <div className="text-xs text-gray-600 mt-1">active nodes</div>
+          <div className="text-2xl sm:text-3xl font-bold text-[#00d4ff] font-mono">{status.connectedCount}</div>
+          <div className="text-[10px] sm:text-xs text-gray-600 mt-1">via BLE mesh</div>
         </div>
-        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-5">
+        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-4 sm:p-5">
           <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Total Relayed</div>
-          <div className="text-3xl font-bold text-[#00ff88] font-mono">{status.totalRelayed.toLocaleString()}</div>
-          <div className="text-xs text-gray-600 mt-1">threat intel messages</div>
+          <div className="text-2xl sm:text-3xl font-bold text-[#00ff88] font-mono">{status.totalRelayed.toLocaleString()}</div>
+          <div className="text-[10px] sm:text-xs text-gray-600 mt-1">threat intel msgs</div>
         </div>
-        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-5">
+        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-4 sm:p-5">
+          <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Offline Queue</div>
+          <div className="text-2xl sm:text-3xl font-bold text-[#9945FF] font-mono">3</div>
+          <div className="text-[10px] sm:text-xs text-gray-600 mt-1">txns awaiting relay</div>
+        </div>
+        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-4 sm:p-5">
           <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Mesh Health</div>
-          <div className={`text-3xl font-bold font-mono ${healthColor}`}>{Math.round(healthPercent)}%</div>
+          <div className={`text-2xl sm:text-3xl font-bold font-mono ${healthColor}`}>{Math.round(healthPercent)}%</div>
           <div className="w-full h-1.5 bg-[#1a1a2e] rounded-full overflow-hidden mt-2">
             <div className={`h-full rounded-full ${healthBarColor} transition-all`} style={{ width: `${healthPercent}%` }} />
           </div>

@@ -330,6 +330,39 @@ private fun ScanResultCard(result: ThreatResult, reported: Boolean, onReport: ()
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Reported to ShieldMesh", color = GreenAccent)
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Pollinet mesh relay indicator
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CyanAccent.copy(alpha = 0.08f))
+                            .border(1.dp, CyanAccent.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = CyanAccent,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = "Queued for Pollinet mesh relay",
+                                color = CyanAccent,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                fontFamily = MonospaceFamily
+                            )
+                            Text(
+                                text = "Broadcasting to nearby peers via BLE",
+                                color = TextMuted,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
                 } else {
                     Button(
                         onClick = onReport,

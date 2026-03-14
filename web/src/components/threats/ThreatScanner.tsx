@@ -346,6 +346,22 @@ export default function ThreatScanner() {
             </button>
           </div>
 
+          {/* Pollinet mesh relay indicator */}
+          {reported && (
+            <div className="bg-[#9945FF]/10 border border-[#9945FF]/25 rounded-lg p-3 flex items-center gap-3">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9945FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <path d="M8.111 16.404a5.5 5.5 0 017.778 0" />
+                <path d="M12 20h.01" />
+                <path d="M2 8.82a15 15 0 0120 0" />
+                <path d="M5.636 12.025a9 9 0 0112.728 0" />
+              </svg>
+              <div>
+                <div className="text-xs text-[#9945FF] font-mono font-medium">Queued for Pollinet mesh relay</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">Broadcasting to nearby peers via BLE/Wi-Fi Direct mesh</div>
+              </div>
+            </div>
+          )}
+
           {/* On-chain transaction result */}
           {chainTxSig && (
             <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">

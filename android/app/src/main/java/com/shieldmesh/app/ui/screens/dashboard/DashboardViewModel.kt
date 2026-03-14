@@ -6,6 +6,8 @@ import com.shieldmesh.app.data.local.entity.ThreatEntity
 import com.shieldmesh.app.data.repository.MeshRepository
 import com.shieldmesh.app.data.repository.ThreatRepository
 import com.shieldmesh.app.data.repository.WalletRepository
+import com.shieldmesh.app.sync.ConnectivityObserver
+import com.shieldmesh.app.sync.ConnectivityStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,8 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     threatRepository: ThreatRepository,
     walletRepository: WalletRepository,
-    meshRepository: MeshRepository
+    meshRepository: MeshRepository,
+    connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     val totalThreats: StateFlow<Int> = threatRepository.getTotalCount()
@@ -37,4 +40,10 @@ class DashboardViewModel @Inject constructor(
     val recentThreats: StateFlow<List<ThreatEntity>> = threatRepository.getAllThreats()
         .map { it.take(10) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val connectivityStatus: StateFlow<ConnectivityStatus> = connectivityObserver.observe
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ConnectivityStatus.AVAILABLE)
+
+    val pendingSyncCount: StateFlow<Int> = threatRepository.getPendingSyncCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 }

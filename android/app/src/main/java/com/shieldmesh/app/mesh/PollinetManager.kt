@@ -88,19 +88,50 @@ class PollinetManager(
         }
     }
 
+    private val _relayLog = MutableStateFlow<List<String>>(emptyList())
+    val relayLog: StateFlow<List<String>> = _relayLog.asStateFlow()
+
+    private fun appendLog(msg: String) {
+        _relayLog.value = (_relayLog.value + msg).takeLast(50)
+        Log.d(TAG, msg)
+    }
+
     private fun startTick() {
         tickJob?.cancel()
         tickJob = scope.launch {
+            appendLog("[MESH] BLE scanning for nearby ShieldMesh nodes...")
+            delay(1500)
+            appendLog("[MESH] Wi-Fi Direct service discovery active")
+
             while (isActive) {
                 refreshMetrics()
 
+                // Simulate peer discovery events
+                val peers = _meshMetrics.value.peersConnected
+                if (peers > 0 && Math.random() > 0.6) {
+                    val peerId = "peer-${(0x1000..0xFFFF).random().toString(16)}"
+                    val distance = (3..25).random()
+                    appendLog("[PEER] Discovered $peerId via BLE (~${distance}m range)")
+                }
+
                 // Simulate mesh relay: move outbound items to received after delay
-                if (outboundQueue.isNotEmpty() && Math.random() > 0.7) {
+                if (outboundQueue.isNotEmpty() && Math.random() > 0.5) {
                     val tx = outboundQueue.removeFirst()
                     receivedQueue.add(tx)
                     _outboundQueueSize.value = outboundQueue.size
                     _receivedQueueSize.value = receivedQueue.size
-                    Log.d(TAG, "Simulated mesh relay: tx moved to received queue")
+                    val peerId = "peer-${(0x1000..0xFFFF).random().toString(16)}"
+                    appendLog("[RELAY] Threat hash relayed to $peerId via BLE mesh")
+                    if (Math.random() > 0.7) {
+                        appendLog("[RELAY] $peerId forwarded to 2 additional peers (mesh hop)")
+                    }
+                }
+
+                // Simulate transaction settlement via mesh
+                if (receivedQueue.isNotEmpty() && Math.random() > 0.8) {
+                    receivedQueue.removeFirst()
+                    _receivedQueueSize.value = receivedQueue.size
+                    appendLog("[SETTLE] Queued transaction submitted to Solana via internet-connected peer")
                 }
 
                 delay(TICK_INTERVAL_MS)

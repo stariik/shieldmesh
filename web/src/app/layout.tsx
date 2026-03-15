@@ -10,7 +10,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "ShieldMesh - Threat Intelligence",
-  description: "Decentralized cybersecurity threat intelligence platform on Solana",
+  description: "AI-powered threat detection that works without internet. Detect, relay, and validate cybersecurity threats offline with bounty rewards on Solana.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

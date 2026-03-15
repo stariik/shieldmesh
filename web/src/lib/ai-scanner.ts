@@ -441,6 +441,199 @@ export class ThreatScanner {
 
     return parts.join(" ");
   }
+
+  // -----------------------------------------------------------------------
+  // File analysis
+  // -----------------------------------------------------------------------
+
+  analyzeFile(content: string, fileName: string, fileSize: number): ThreatResult {
+    const indicators: ThreatIndicator[] = [];
+
+    // File metadata checks
+    this.analyzeFileName(fileName, indicators);
+    this.analyzeFileSize(fileSize, indicators);
+
+    // Scan file content for threats (same text analysis pipeline)
+    if (content.length > 0) {
+      // Extract and scan all URLs in the file
+      const urlMatches = content.match(/https?:\/\/[^\s<>"')\]]+/gi);
+      if (urlMatches) {
+        const uniqueUrls = [...new Set(urlMatches)].slice(0, 50); // cap at 50
+        for (const url of uniqueUrls) {
+          this.analyzeUrl(url, indicators);
+        }
+        if (uniqueUrls.length > 5) {
+          indicators.push({ label: `File contains ${uniqueUrls.length} URLs — bulk phishing or link farm`, weight: 15, category: "phishing" });
+        }
+      }
+
+      // Run message analysis on text content
+      this.analyzeMessage(content, indicators);
+
+      // File-specific content patterns
+      this.analyzeFileContent(content, indicators);
+    }
+
+    // Deduplicate
+    const seen = new Set<string>();
+    const unique = indicators.filter((ind) => {
+      if (seen.has(ind.label)) return false;
+      seen.add(ind.label);
+      return true;
+    });
+
+    const rawScore = unique.reduce((sum, ind) => sum + ind.weight, 0);
+    const score = Math.min(100, Math.max(0, Math.round(rawScore)));
+    const severity = this.scoreSeverity(score);
+    const safe = score < 35;
+
+    const description = this.generateFileDescription(unique, score, fileName);
+
+    return { score, severity, indicators: unique, description, safe };
+  }
+
+  private analyzeFileName(fileName: string, out: ThreatIndicator[]): void {
+    const lower = fileName.toLowerCase();
+
+    // Double extension tricks (e.g. invoice.pdf.exe)
+    const parts = fileName.split(".");
+    if (parts.length > 2) {
+      const lastExt = parts[parts.length - 1].toLowerCase();
+      const secondLastExt = parts[parts.length - 2].toLowerCase();
+      const execExtensions = new Set(["exe", "bat", "cmd", "scr", "pif", "com", "vbs", "js", "ps1", "msi", "jar", "apk"]);
+      const docExtensions = new Set(["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "jpg", "png"]);
+      if (execExtensions.has(lastExt) && docExtensions.has(secondLastExt)) {
+        out.push({ label: `Double extension trick: .${secondLastExt}.${lastExt} — disguises executable as document`, weight: 30, category: "technical" });
+      }
+    }
+
+    // Dangerous file extensions
+    const dangerousExts = new Set(["exe", "bat", "cmd", "scr", "pif", "com", "vbs", "vbe", "js", "jse", "wsf", "wsh", "ps1", "msi", "dll", "sys"]);
+    const ext = parts[parts.length - 1]?.toLowerCase();
+    if (dangerousExts.has(ext)) {
+      out.push({ label: `Dangerous file type (.${ext}) — executable or script`, weight: 25, category: "technical" });
+    }
+
+    // Macro-enabled Office documents
+    const macroExts = new Set(["docm", "xlsm", "pptm", "dotm", "xltm"]);
+    if (macroExts.has(ext)) {
+      out.push({ label: `Macro-enabled Office document (.${ext}) — may contain malicious macros`, weight: 20, category: "technical" });
+    }
+
+    // Suspicious filename keywords
+    const suspiciousNames = ["invoice", "payment", "receipt", "urgent", "verify", "password", "login", "account", "security", "update", "confirm"];
+    for (const kw of suspiciousNames) {
+      if (lower.includes(kw)) {
+        out.push({ label: `Suspicious filename keyword: "${kw}" — common in phishing attachments`, weight: 8, category: "social_engineering" });
+        break;
+      }
+    }
+
+    // Unicode in filename (right-to-left override, zero-width chars)
+    if (/[\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF]/.test(fileName)) {
+      out.push({ label: "Hidden Unicode characters in filename — possible extension spoofing", weight: 25, category: "technical" });
+    }
+  }
+
+  private analyzeFileSize(fileSize: number, out: ThreatIndicator[]): void {
+    // Suspiciously small executables (< 10KB) may be droppers
+    if (fileSize < 10_000 && fileSize > 0) {
+      out.push({ label: "Very small file — could be a dropper or downloader stub", weight: 6, category: "technical" });
+    }
+  }
+
+  private analyzeFileContent(content: string, out: ThreatIndicator[]): void {
+    const lower = content.toLowerCase();
+
+    // Base64 encoded blobs
+    const base64Chunks = content.match(/[A-Za-z0-9+/]{50,}={0,2}/g);
+    if (base64Chunks && base64Chunks.length > 0) {
+      out.push({ label: `Base64-encoded data detected (${base64Chunks.length} block${base64Chunks.length > 1 ? "s" : ""}) — possible obfuscated payload`, weight: 12, category: "technical" });
+    }
+
+    // Script tags / HTML injection
+    if (/<script[\s>]/i.test(content)) {
+      out.push({ label: "Embedded <script> tag — potential XSS or malicious code injection", weight: 18, category: "technical" });
+    }
+
+    // PowerShell commands
+    if (/powershell|invoke-expression|invoke-webrequest|downloadstring|iex\s*\(/i.test(content)) {
+      out.push({ label: "PowerShell command detected — possible remote code execution", weight: 25, category: "technical" });
+    }
+
+    // Shell commands
+    if (/\bcurl\s+.*https?:|wget\s+.*https?:|bash\s+-c\s|\/bin\/sh/i.test(content)) {
+      out.push({ label: "Shell download command detected — potential dropper payload", weight: 22, category: "technical" });
+    }
+
+    // Wallet address harvesting patterns
+    const solanaAddrPattern = /[1-9A-HJ-NP-Za-km-z]{32,44}/g;
+    const solAddrs = content.match(solanaAddrPattern);
+    if (solAddrs && solAddrs.length > 3) {
+      out.push({ label: `Multiple Solana-like addresses found (${solAddrs.length}) — possible address swap/clipboard hijack list`, weight: 15, category: "crypto_scam" });
+    }
+
+    // Private key patterns
+    if (/-----BEGIN.*PRIVATE KEY-----/i.test(content) || /[0-9a-f]{64}/i.test(content)) {
+      const hexMatches = content.match(/[0-9a-f]{64}/gi);
+      if (hexMatches && hexMatches.length > 0) {
+        out.push({ label: "Possible private key or secret material in file", weight: 20, category: "crypto_scam" });
+      }
+    }
+
+    // Obfuscated JavaScript
+    if (/eval\s*\(|document\.write\s*\(|unescape\s*\(|atob\s*\(|String\.fromCharCode/i.test(content)) {
+      out.push({ label: "JavaScript obfuscation pattern — eval/unescape/fromCharCode", weight: 15, category: "technical" });
+    }
+  }
+
+  private generateFileDescription(
+    indicators: ThreatIndicator[],
+    score: number,
+    fileName: string,
+  ): string {
+    if (indicators.length === 0) {
+      return `File analysis complete for "${fileName}". No significant threat indicators were identified. The file content appears benign based on pattern matching and heuristic analysis.`;
+    }
+
+    const categoryCount: Record<string, number> = {};
+    for (const ind of indicators) {
+      categoryCount[ind.category] = (categoryCount[ind.category] || 0) + 1;
+    }
+
+    const parts: string[] = [];
+
+    if (score >= 80) {
+      parts.push(`CRITICAL THREAT DETECTED in file "${fileName}".`);
+    } else if (score >= 60) {
+      parts.push(`High-confidence threat indicators found in "${fileName}".`);
+    } else if (score >= 35) {
+      parts.push(`Moderate risk — "${fileName}" contains suspicious content.`);
+    } else {
+      parts.push(`Low risk — "${fileName}" has minor anomalies.`);
+    }
+
+    if (categoryCount.phishing) {
+      parts.push(`Phishing analysis flagged ${categoryCount.phishing} indicator${categoryCount.phishing > 1 ? "s" : ""}.`);
+    }
+    if (categoryCount.social_engineering) {
+      parts.push(`Social engineering patterns detected (${categoryCount.social_engineering}).`);
+    }
+    if (categoryCount.crypto_scam) {
+      parts.push(`Crypto threat patterns found (${categoryCount.crypto_scam}).`);
+    }
+    if (categoryCount.technical) {
+      parts.push(`Technical analysis identified ${categoryCount.technical} anomal${categoryCount.technical > 1 ? "ies" : "y"}.`);
+    }
+
+    if (score >= 60) {
+      parts.push("Recommendation: Do NOT open or execute this file. Report to ShieldMesh.");
+    } else if (score >= 35) {
+      parts.push("Recommendation: Exercise caution. Verify the source before opening.");
+    }
+
+    return parts.join(" ");
+  }
 }
 
 // Singleton for convenience

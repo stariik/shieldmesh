@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const features = [
@@ -48,16 +49,21 @@ export default function LandingPage() {
 
         <div className="relative max-w-5xl mx-auto px-6 pt-16 sm:pt-24 pb-20 text-center">
           {/* Logo */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00ff88] to-[#00d4ff] flex items-center justify-center">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <Image
+              src="/logo.png"
+              alt="ShieldMesh Logo"
+              width={64}
+              height={64}
+              className="drop-shadow-[0_0_20px_rgba(0,255,136,0.3)]"
+            />
+            <div className="text-left">
+              <span className="text-3xl font-black tracking-tight">
+                <span className="text-white">Shield</span>
+                <span className="bg-gradient-to-r from-[#00ff88] to-[#00d4ff] bg-clip-text text-transparent">Mesh</span>
+              </span>
+              <div className="text-[10px] text-gray-500 uppercase tracking-[0.25em] font-mono -mt-0.5">Decentralized Threat Intelligence</div>
             </div>
-            <span className="text-2xl font-bold tracking-wide">
-              <span className="text-white">Shield</span>
-              <span className="text-[#00ff88]">Mesh</span>
-            </span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
@@ -69,8 +75,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Decentralized threat intelligence powered by AI and Pollinet mesh networking.
-            Detect, relay, and validate cybersecurity threats — even offline — with rewards on Solana.
+            AI-powered threat detection that works without internet. ShieldMesh uses Pollinet mesh networking to detect, relay, and validate cybersecurity threats across devices — even fully offline — with bounty rewards settled on Solana.
           </p>
 
           {/* CTAs */}
@@ -189,13 +194,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[#1a1a2e] py-8 px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00ff88] to-[#00d4ff] flex items-center justify-center">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-gray-400">ShieldMesh</span>
+          <div className="flex items-center gap-2.5">
+            <Image src="/logo.png" alt="ShieldMesh" width={28} height={28} />
+            <span className="text-sm font-bold text-gray-400">Shield<span className="text-[#00ff88]">Mesh</span></span>
           </div>
           <div className="text-xs text-gray-600 font-mono text-center">
             Built for Scriptonia Championship 2026 // Solana Devnet

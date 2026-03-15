@@ -1,7 +1,7 @@
 package com.shieldmesh.app.ui.screens.bounties
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,11 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -42,17 +41,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shieldmesh.app.data.local.entity.BountyEntity
+import com.shieldmesh.app.ui.components.GlassCard
+import com.shieldmesh.app.ui.components.GradientDivider
+import com.shieldmesh.app.ui.components.SectionHeader
+import com.shieldmesh.app.ui.components.StatCardPremium
+import com.shieldmesh.app.ui.components.StatusBadge
 import com.shieldmesh.app.ui.theme.CardBackground
 import com.shieldmesh.app.ui.theme.CardBorder
 import com.shieldmesh.app.ui.theme.CriticalRed
 import com.shieldmesh.app.ui.theme.CyanAccent
 import com.shieldmesh.app.ui.theme.DarkBackground
+import com.shieldmesh.app.ui.theme.GradientGoldEnd
+import com.shieldmesh.app.ui.theme.GradientGoldStart
 import com.shieldmesh.app.ui.theme.GreenAccent
 import com.shieldmesh.app.ui.theme.MediumYellow
 import com.shieldmesh.app.ui.theme.MonospaceFamily
@@ -78,116 +86,157 @@ fun BountyScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBackground)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.MonetizationOn, contentDescription = null, tint = MediumYellow, modifier = Modifier.size(28.dp))
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text("Bounties & Staking", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
-                    Text("Earn rewards for threat validation", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
-                }
-            }
+            Spacer(modifier = Modifier.height(20.dp))
+            SectionHeader(
+                title = "Bounties & Staking",
+                subtitle = "Earn rewards for threat validation",
+                icon = Icons.Default.MonetizationOn,
+                accentColor = MediumYellow
+            )
         }
 
-        // Pool Stats
+        // Pool Stats - row 1
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                PoolStatCard(
+                StatCardPremium(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.AccountBalance,
                     value = String.format("%.2f", totalPool),
                     label = "Bounty Pool (SOL)",
-                    color = MediumYellow
+                    accentColor = MediumYellow
                 )
-                PoolStatCard(
+                StatCardPremium(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.TrendingUp,
                     value = String.format("%.2f", totalStaked),
                     label = "Total Staked (SOL)",
-                    color = GreenAccent
+                    accentColor = GreenAccent
                 )
             }
         }
 
+        // Validators stat
         item {
-            PoolStatCard(
+            StatCardPremium(
                 modifier = Modifier.fillMaxWidth(),
                 icon = Icons.Default.People,
                 value = stakerCount.toString(),
                 label = "Active Validators",
-                color = CyanAccent
+                accentColor = CyanAccent
             )
         }
 
         // Stake/Unstake panel
         item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
-                border = BorderStroke(1.dp, CardBorder),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+            GlassCard(
+                glowColor = GreenAccent,
+                borderColor = GreenAccent.copy(alpha = 0.15f)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Stake SOL",
-                        color = TextPrimary,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = "Stake to become a validator and earn bounty rewards",
-                        color = TextSecondary,
-                        fontSize = 12.sp
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(GreenAccent.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.TrendingUp,
+                                contentDescription = null,
+                                tint = GreenAccent,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Stake SOL",
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp
+                            )
+                            Text(
+                                text = "Become a validator and earn rewards",
+                                color = TextSecondary,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = stakeAmount,
                         onValueChange = { stakeAmount = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Amount (SOL)", color = TextMuted) },
-                        placeholder = { Text("0.00", color = TextMuted) },
+                        placeholder = {
+                            Text(
+                                "0.00",
+                                color = TextMuted,
+                                fontFamily = MonospaceFamily
+                            )
+                        },
+                        suffix = {
+                            Text(
+                                "SOL",
+                                color = TextMuted,
+                                fontFamily = MonospaceFamily,
+                                fontSize = 12.sp
+                            )
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GreenAccent,
+                            focusedBorderColor = GreenAccent.copy(alpha = 0.5f),
                             unfocusedBorderColor = CardBorder,
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
-                            cursorColor = GreenAccent
+                            cursorColor = GreenAccent,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent
                         ),
-                        shape = RoundedCornerShape(8.dp),
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            fontFamily = MonospaceFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                         singleLine = true
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        // Stake button with gradient feel
                         Button(
                             onClick = {
                                 val amount = stakeAmount.toDoubleOrNull() ?: return@Button
                                 viewModel.stake(amount)
                                 stakeAmount = ""
                             },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
                             enabled = stakeAmount.toDoubleOrNull() != null && (stakeAmount.toDoubleOrNull() ?: 0.0) > 0,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = GreenAccent,
                                 contentColor = DarkBackground,
-                                disabledContainerColor = CardBorder
+                                disabledContainerColor = CardBorder,
+                                disabledContentColor = TextMuted
                             ),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Stake", fontWeight = FontWeight.Bold)
+                            Text("Stake", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
 
                         OutlinedButton(
@@ -196,42 +245,68 @@ fun BountyScreen(
                                 viewModel.unstake(amount)
                                 stakeAmount = ""
                             },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
                             enabled = stakeAmount.toDoubleOrNull() != null && (stakeAmount.toDoubleOrNull() ?: 0.0) > 0,
-                            border = BorderStroke(1.dp, CriticalRed.copy(alpha = 0.5f)),
-                            shape = RoundedCornerShape(8.dp)
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                CriticalRed.copy(alpha = 0.4f)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Unstake", color = CriticalRed, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Unstake",
+                                color = CriticalRed,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
                         }
                     }
                 }
             }
         }
 
-        // Bounties header
+        // Active Bounties
         item {
+            GradientDivider(modifier = Modifier.padding(vertical = 2.dp))
             Text(
                 text = "Active Bounties",
-                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
                 color = TextPrimary,
-                modifier = Modifier.padding(top = 4.dp)
+                letterSpacing = (-0.2).sp
             )
         }
 
         if (bounties.isEmpty()) {
             item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = CardBackground),
-                    border = BorderStroke(1.dp, CardBorder),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "No active bounties. Report threats to create bounties.",
-                        color = TextMuted,
-                        modifier = Modifier.padding(24.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                GlassCard {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.MonetizationOn,
+                            contentDescription = null,
+                            tint = TextMuted,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "No active bounties",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "Report threats to create bounties",
+                            color = TextSecondary,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
         } else {
@@ -245,54 +320,19 @@ fun BountyScreen(
 }
 
 @Composable
-private fun PoolStatCard(
-    modifier: Modifier = Modifier,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    value: String,
-    label: String,
-    color: androidx.compose.ui.graphics.Color
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        border = BorderStroke(1.dp, CardBorder),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = value,
-                    fontFamily = MonospaceFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = TextPrimary
-                )
-                Text(text = label, fontSize = 11.sp, color = TextSecondary)
-            }
-        }
-    }
-}
-
-@Composable
 private fun BountyCard(bounty: BountyEntity) {
     val dateFormat = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
     val dateStr = dateFormat.format(Date(bounty.timestamp))
+    val statusColor = if (bounty.claimed) TextMuted else MediumYellow
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        border = BorderStroke(1.dp, if (bounty.claimed) CardBorder else MediumYellow.copy(alpha = 0.2f)),
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
+    GlassCard(
+        glowColor = if (!bounty.claimed) MediumYellow else Color.Transparent,
+        borderColor = if (bounty.claimed) CardBorder else MediumYellow.copy(alpha = 0.2f)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -302,35 +342,43 @@ private fun BountyCard(bounty: BountyEntity) {
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(if (bounty.claimed) TextMuted else MediumYellow)
+                            .background(statusColor)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = if (bounty.claimed) "Claimed" else "Active",
-                        color = if (bounty.claimed) TextMuted else MediumYellow,
+                        color = statusColor,
                         fontFamily = MonospaceFamily,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        letterSpacing = 0.5.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Threat: ${bounty.threatId.take(12)}...",
                     fontFamily = MonospaceFamily,
                     color = TextSecondary,
                     fontSize = 11.sp
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(text = dateStr, color = TextMuted, fontSize = 10.sp)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = String.format("%.3f", bounty.amount),
                     fontFamily = MonospaceFamily,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
                     color = if (bounty.claimed) TextMuted else GreenAccent,
-                    fontSize = 16.sp
+                    fontSize = 18.sp
                 )
-                Text(text = "SOL", color = TextMuted, fontFamily = MonospaceFamily, fontSize = 10.sp)
+                Text(
+                    text = "SOL",
+                    color = TextMuted,
+                    fontFamily = MonospaceFamily,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp
+                )
             }
         }
     }

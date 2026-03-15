@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { Severity } from "@/types/threat";
 import { SEVERITY_BG } from "@/lib/constants";
 import { useThreatStore } from "@/store/threatStore";
@@ -25,8 +25,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   url_structure: "URL Structure",
 };
 
+type ScanMode = "text" | "file";
+
 export default function ThreatScanner() {
+  const [scanMode, setScanMode] = useState<ScanMode>("text");
   const [input, setInput] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ThreatResult | null>(null);
@@ -36,11 +40,13 @@ export default function ThreatScanner() {
   const [chainTxSig, setChainTxSig] = useState<string | null>(null);
   const [chainReporting, setChainReporting] = useState(false);
   const [chainError, setChainError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   const { reportThreat, connected: shieldMeshConnected } = useShieldMesh();
   const { publicKey } = useWallet();
 
-  const phases = [
+  const textPhases = [
     "Initializing neural scan engine...",
     "Resolving DNS records & WHOIS data...",
     "Running homoglyph & typo-squat detection...",
@@ -51,18 +57,35 @@ export default function ThreatScanner() {
     "Finalizing analysis...",
   ];
 
-  const runScan = useCallback(() => {
-    if (!input.trim()) return;
-    setScanning(true);
-    setResult(null);
-    setProgress(0);
-    setReported(false);
-    setChainTxSig(null);
-    setChainError(null);
+  const filePhases = [
+    "Initializing file analysis engine...",
+    "Reading file metadata & extension...",
+    "Scanning for double extension tricks...",
+    "Analyzing embedded URLs & links...",
+    "Detecting obfuscated payloads & scripts...",
+    "Scanning for crypto wallet patterns...",
+    "Computing weighted AI threat score...",
+    "Finalizing file analysis...",
+  ];
 
-    // Eagerly compute the real result so we can reveal it at the end
-    const realResult = threatScanner.analyze(input.trim());
+  const handleFileDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setScanMode("file");
+    }
+  }, []);
 
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  }, []);
+
+  const runAnimatedScan = useCallback((realResult: ThreatResult, phases: string[]) => {
     let currentProgress = 0;
     let phaseIndex = 0;
     setScanPhase(phases[0]);
@@ -88,12 +111,45 @@ export default function ThreatScanner() {
         setScanPhase("");
       }
     }, 200);
-  }, [input]);
+  }, []);
+
+  const runScan = useCallback(() => {
+    if (scanMode === "text" && !input.trim()) return;
+    if (scanMode === "file" && !selectedFile) return;
+
+    setScanning(true);
+    setResult(null);
+    setProgress(0);
+    setReported(false);
+    setChainTxSig(null);
+    setChainError(null);
+
+    if (scanMode === "file" && selectedFile) {
+      // Read file content then analyze
+      const reader = new FileReader();
+      reader.onload = () => {
+        const content = typeof reader.result === "string" ? reader.result : "";
+        const realResult = threatScanner.analyzeFile(content, selectedFile.name, selectedFile.size);
+        runAnimatedScan(realResult, filePhases);
+      };
+      reader.onerror = () => {
+        // If can't read as text, analyze just metadata
+        const realResult = threatScanner.analyzeFile("", selectedFile.name, selectedFile.size);
+        runAnimatedScan(realResult, filePhases);
+      };
+      // Read as text (works for most scannable file types)
+      reader.readAsText(selectedFile);
+    } else {
+      const realResult = threatScanner.analyze(input.trim());
+      runAnimatedScan(realResult, textPhases);
+    }
+  }, [input, scanMode, selectedFile, runAnimatedScan]);
 
   const handleReport = async () => {
     if (!result) return;
 
-    const hashHex = sha256Hex(input.trim() + Date.now().toString());
+    const scanTarget = scanMode === "file" && selectedFile ? `file:${selectedFile.name}` : input.trim();
+    const hashHex = sha256Hex(scanTarget + Date.now().toString());
     const walletKey = publicKey?.toBase58() ?? "YourWa11etPubkeyHere111111111111111111111111";
 
     // Always add to local threat store
@@ -107,7 +163,7 @@ export default function ThreatScanner() {
       status: "PENDING",
       timestamp: Date.now(),
       description: result.description,
-      url: input.trim(),
+      url: scanTarget,
     });
     setReported(true);
 
@@ -142,29 +198,147 @@ export default function ThreatScanner() {
 
   return (
     <div className="space-y-6">
-      {/* Input bar */}
-      <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-6">
-        <label className="block text-sm text-gray-400 mb-2 font-mono">
-          Paste URL or message to scan
-        </label>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="https://suspicious-site.xyz/connect-wallet..."
-            className="flex-1 bg-[#0a0a0f] border border-[#1a1a2e] rounded-lg px-4 py-3 text-sm text-white font-mono placeholder-gray-600 focus:outline-none focus:border-[#00ff88]/40 focus:shadow-[0_0_15px_rgba(0,255,136,0.05)] transition-all"
-            onKeyDown={(e) => e.key === "Enter" && runScan()}
-          />
-          <button
-            onClick={runScan}
-            disabled={scanning || !input.trim()}
-            className="px-6 py-3 bg-gradient-to-r from-[#00ff88] to-[#00d4ff] text-[#0a0a0f] font-bold text-sm rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,255,136,0.15)] shrink-0"
-          >
-            {scanning ? "Scanning..." : "Scan"}
-          </button>
-        </div>
+      {/* Mode tabs */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => { setScanMode("text"); setResult(null); }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            scanMode === "text"
+              ? "bg-[#00ff88]/15 text-[#00ff88] border border-[#00ff88]/30"
+              : "bg-[#0f0f1a] text-gray-400 border border-[#1a1a2e] hover:text-white hover:border-gray-600"
+          }`}
+        >
+          <span className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            URL / Text
+          </span>
+        </button>
+        <button
+          onClick={() => { setScanMode("file"); setResult(null); }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            scanMode === "file"
+              ? "bg-[#00d4ff]/15 text-[#00d4ff] border border-[#00d4ff]/30"
+              : "bg-[#0f0f1a] text-gray-400 border border-[#1a1a2e] hover:text-white hover:border-gray-600"
+          }`}
+        >
+          <span className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="12" y1="18" x2="12" y2="12" />
+              <line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+            File Upload
+          </span>
+        </button>
       </div>
+
+      {/* Input area */}
+      {scanMode === "text" ? (
+        <div className="bg-[#0f0f1a] border border-[#1a1a2e] rounded-xl p-6">
+          <label className="block text-sm text-gray-400 mb-2 font-mono">
+            Paste URL or message to scan
+          </label>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="https://suspicious-site.xyz/connect-wallet..."
+              className="flex-1 bg-[#0a0a0f] border border-[#1a1a2e] rounded-lg px-4 py-3 text-sm text-white font-mono placeholder-gray-600 focus:outline-none focus:border-[#00ff88]/40 focus:shadow-[0_0_15px_rgba(0,255,136,0.05)] transition-all"
+              onKeyDown={(e) => e.key === "Enter" && runScan()}
+            />
+            <button
+              onClick={runScan}
+              disabled={scanning || !input.trim()}
+              className="px-6 py-3 bg-gradient-to-r from-[#00ff88] to-[#00d4ff] text-[#0a0a0f] font-bold text-sm rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,255,136,0.15)] shrink-0"
+            >
+              {scanning ? "Scanning..." : "Scan"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={`bg-[#0f0f1a] border-2 border-dashed rounded-xl p-8 transition-all ${
+            dragOver
+              ? "border-[#00d4ff] bg-[#00d4ff]/5"
+              : selectedFile
+                ? "border-[#00d4ff]/30"
+                : "border-[#1a1a2e] hover:border-[#1a1a2e]/80"
+          }`}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleFileDrop}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+
+          {selectedFile ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#00d4ff]/10 border border-[#00d4ff]/20 flex items-center justify-center shrink-0">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm truncate">{selectedFile.name}</p>
+                  <p className="text-xs text-gray-500 font-mono">
+                    {selectedFile.size < 1024
+                      ? `${selectedFile.size} B`
+                      : selectedFile.size < 1024 * 1024
+                        ? `${(selectedFile.size / 1024).toFixed(1)} KB`
+                        : `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`
+                    }
+                    {selectedFile.type ? ` · ${selectedFile.type}` : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                  className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <button
+                onClick={runScan}
+                disabled={scanning}
+                className="w-full px-6 py-3 bg-gradient-to-r from-[#00d4ff] to-[#00ff88] text-[#0a0a0f] font-bold text-sm rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(0,212,255,0.15)]"
+              >
+                {scanning ? "Scanning File..." : "Scan File"}
+              </button>
+            </div>
+          ) : (
+            <div
+              className="text-center cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#00d4ff]/10 border border-[#00d4ff]/15 flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <p className="text-white font-medium mb-1">Drop a file here or click to browse</p>
+              <p className="text-xs text-gray-500">
+                Supports text files, scripts, documents, configs, and more
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Scan animation */}
       {scanning && (
@@ -337,8 +511,10 @@ export default function ThreatScanner() {
               onClick={() => {
                 setResult(null);
                 setInput("");
+                setSelectedFile(null);
                 setChainTxSig(null);
                 setChainError(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
               }}
               className="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-400 border border-[#1a1a2e] hover:border-gray-600 transition-all"
             >

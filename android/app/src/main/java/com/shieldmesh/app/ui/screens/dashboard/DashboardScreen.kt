@@ -1,5 +1,11 @@
 package com.shieldmesh.app.ui.screens.dashboard
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,8 +30,6 @@ import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,18 +39,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shieldmesh.app.data.local.entity.Severity
 import com.shieldmesh.app.data.local.entity.ThreatEntity
+import com.shieldmesh.app.ui.components.GlassCard
+import com.shieldmesh.app.ui.components.GradientDivider
+import com.shieldmesh.app.ui.components.PulsingDot
+import com.shieldmesh.app.ui.components.StatCardPremium
+import com.shieldmesh.app.ui.components.StatusBadge
 import com.shieldmesh.app.ui.theme.CardBackground
 import com.shieldmesh.app.ui.theme.CardBorder
 import com.shieldmesh.app.ui.theme.CriticalRed
 import com.shieldmesh.app.ui.theme.CyanAccent
 import com.shieldmesh.app.ui.theme.DarkBackground
+import com.shieldmesh.app.ui.theme.GlowGreen
+import com.shieldmesh.app.ui.theme.GradientGreenEnd
+import com.shieldmesh.app.ui.theme.GradientGreenStart
 import com.shieldmesh.app.ui.theme.GreenAccent
 import com.shieldmesh.app.ui.theme.HighOrange
 import com.shieldmesh.app.ui.theme.LowGreen
@@ -77,81 +93,125 @@ fun DashboardScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBackground)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Hero header with gradient
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Spacer(modifier = Modifier.height(20.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                GreenAccent.copy(alpha = 0.08f),
+                                CyanAccent.copy(alpha = 0.04f),
+                                Color.Transparent
+                            ),
+                            start = Offset(0f, 0f),
+                            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                        )
+                    )
+                    .padding(24.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Shield,
-                    contentDescription = null,
-                    tint = GreenAccent,
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = "ShieldMesh",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = TextPrimary
-                    )
-                    Text(
-                        text = "Decentralized Threat Intelligence",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Shield logo with glow
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        GreenAccent.copy(alpha = 0.12f),
+                                        CyanAccent.copy(alpha = 0.06f)
+                                    )
+                                )
+                            )
+                            .drawBehind {
+                                drawRoundRect(
+                                    color = GreenAccent.copy(alpha = 0.15f),
+                                    cornerRadius = CornerRadius(16.dp.toPx()),
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                        width = 1.dp.toPx()
+                                    )
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = GreenAccent,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Shield",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 28.sp,
+                                color = TextPrimary,
+                                letterSpacing = (-0.5).sp
+                            )
+                            Text(
+                                text = "Mesh",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 28.sp,
+                                color = GreenAccent,
+                                letterSpacing = (-0.5).sp
+                            )
+                        }
+                        Text(
+                            text = "DECENTRALIZED THREAT INTELLIGENCE",
+                            fontSize = 9.sp,
+                            color = TextMuted,
+                            letterSpacing = 2.sp,
+                            fontFamily = MonospaceFamily,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
 
         // Connectivity status banner
         if (connectivity != ConnectivityStatus.AVAILABLE) {
             item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = CriticalRed.copy(alpha = 0.1f)),
-                    border = BorderStroke(1.dp, CriticalRed.copy(alpha = 0.25f)),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
+                GlassCard(
+                    glowColor = CriticalRed,
+                    borderColor = CriticalRed.copy(alpha = 0.3f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(CriticalRed)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        PulsingDot(color = CriticalRed)
+                        Spacer(modifier = Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Offline Mode",
                                 color = CriticalRed,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
                             )
                             Text(
-                                text = "Threats queued locally. Relaying via Pollinet mesh.",
-                                color = TextMuted,
-                                fontSize = 11.sp
+                                text = "Relaying via Pollinet mesh",
+                                color = TextSecondary,
+                                fontSize = 12.sp
                             )
                         }
                         if (pendingSyncCount > 0) {
-                            Text(
+                            StatusBadge(
                                 text = "$pendingSyncCount queued",
-                                color = CriticalRed,
-                                fontFamily = MonospaceFamily,
-                                fontSize = 11.sp,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(CriticalRed.copy(alpha = 0.15f))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                color = CriticalRed
                             )
                         }
                     }
@@ -159,28 +219,21 @@ fun DashboardScreen(
             }
         } else if (pendingSyncCount > 0) {
             item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MediumYellow.copy(alpha = 0.1f)),
-                    border = BorderStroke(1.dp, MediumYellow.copy(alpha = 0.25f)),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
+                GlassCard(
+                    glowColor = MediumYellow,
+                    borderColor = MediumYellow.copy(alpha = 0.3f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(MediumYellow)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        PulsingDot(color = MediumYellow)
+                        Spacer(modifier = Modifier.width(14.dp))
                         Text(
-                            text = "Syncing $pendingSyncCount threat${if (pendingSyncCount > 1) "s" else ""} to the network...",
+                            text = "Syncing $pendingSyncCount threat${if (pendingSyncCount > 1) "s" else ""}...",
                             color = MediumYellow,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
+                            fontSize = 14.sp
                         )
                     }
                 }
@@ -193,14 +246,14 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard(
+                StatCardPremium(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.BugReport,
                     value = totalThreats.toString(),
                     label = "Total Threats",
                     accentColor = CyanAccent
                 )
-                StatCard(
+                StatCardPremium(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.VerifiedUser,
                     value = verifiedThreats.toString(),
@@ -216,14 +269,14 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard(
+                StatCardPremium(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.Shield,
                     value = String.format("%.2f", poolBalance),
                     label = "Pool (SOL)",
                     accentColor = CyanAccent
                 )
-                StatCard(
+                StatCardPremium(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.Hub,
                     value = meshPeers.toString(),
@@ -233,64 +286,114 @@ fun DashboardScreen(
             }
         }
 
-        // Quick scan button
+        // Quick scan CTA button
         item {
-            Card(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onNavigateToScan() },
-                colors = CardDefaults.cardColors(containerColor = GreenAccent.copy(alpha = 0.1f)),
-                border = BorderStroke(1.dp, GreenAccent.copy(alpha = 0.3f)),
-                shape = RoundedCornerShape(12.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                GradientGreenStart.copy(alpha = 0.15f),
+                                GradientGreenEnd.copy(alpha = 0.1f)
+                            )
+                        )
+                    )
+                    .drawBehind {
+                        drawRoundRect(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    GradientGreenStart.copy(alpha = 0.4f),
+                                    GradientGreenEnd.copy(alpha = 0.2f)
+                                )
+                            ),
+                            cornerRadius = CornerRadius(16.dp.toPx()),
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                width = 1.dp.toPx()
+                            )
+                        )
+                    }
+                    .clickable { onNavigateToScan() }
+                    .padding(20.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.QrCodeScanner,
-                        contentDescription = null,
-                        tint = GreenAccent,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Quick Scan",
-                        color = GreenAccent,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(GreenAccent.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = null,
+                            tint = GreenAccent,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column {
+                        Text(
+                            text = "Quick Scan",
+                            color = GreenAccent,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp
+                        )
+                        Text(
+                            text = "Analyze URLs & messages for threats",
+                            color = TextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }
 
-        // Recent threats header
+        // Recent threats
         item {
+            GradientDivider(modifier = Modifier.padding(vertical = 4.dp))
             Text(
                 text = "Recent Threats",
-                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
                 color = TextPrimary,
-                modifier = Modifier.padding(top = 8.dp)
+                letterSpacing = (-0.2).sp
             )
         }
 
         if (recentThreats.isEmpty()) {
             item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = CardBackground),
-                    border = BorderStroke(1.dp, CardBorder),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "No threats reported yet. Use the scanner to analyze URLs and messages.",
-                        color = TextMuted,
-                        modifier = Modifier.padding(24.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                GlassCard {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = TextMuted,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "All clear",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "No threats reported yet. Use the scanner to get started.",
+                            color = TextSecondary,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
         } else {
@@ -300,46 +403,6 @@ fun DashboardScreen(
         }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
-    }
-}
-
-@Composable
-private fun StatCard(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    value: String,
-    label: String,
-    accentColor: androidx.compose.ui.graphics.Color
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        border = BorderStroke(1.dp, CardBorder),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = accentColor,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = value,
-                fontFamily = MonospaceFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = TextPrimary
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary
-            )
-        }
     }
 }
 
@@ -355,13 +418,11 @@ private fun ThreatListItem(threat: ThreatEntity) {
     val dateFormat = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
     val dateStr = dateFormat.format(Date(threat.timestamp))
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        border = BorderStroke(1.dp, CardBorder),
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
+    GlassCard(
+        glowColor = severityColor,
+        borderColor = severityColor.copy(alpha = 0.2f)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -374,30 +435,30 @@ private fun ThreatListItem(threat: ThreatEntity) {
                             .clip(CircleShape)
                             .background(severityColor)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = threat.severity.name,
                         color = severityColor,
                         fontFamily = MonospaceFamily,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        letterSpacing = 1.sp
                     )
                 }
-                Text(
+                StatusBadge(
                     text = "Score: ${threat.aiScore}",
-                    fontFamily = MonospaceFamily,
-                    color = CyanAccent,
-                    fontSize = 12.sp
+                    color = CyanAccent
                 )
             }
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = threat.url.take(60) + if (threat.url.length > 60) "..." else "",
                 fontFamily = MonospaceFamily,
                 color = TextPrimary,
-                fontSize = 13.sp
+                fontSize = 13.sp,
+                lineHeight = 18.sp
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -407,16 +468,32 @@ private fun ThreatListItem(threat: ThreatEntity) {
                     color = TextMuted,
                     fontSize = 11.sp
                 )
-                Text(
-                    text = threat.syncStatus.name,
-                    color = when (threat.syncStatus.name) {
-                        "SYNCED" -> GreenAccent
-                        "PENDING" -> MediumYellow
-                        else -> CriticalRed
-                    },
-                    fontFamily = MonospaceFamily,
-                    fontSize = 11.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when (threat.syncStatus.name) {
+                                    "SYNCED" -> GreenAccent
+                                    "PENDING" -> MediumYellow
+                                    else -> CriticalRed
+                                }
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = threat.syncStatus.name,
+                        color = when (threat.syncStatus.name) {
+                            "SYNCED" -> GreenAccent
+                            "PENDING" -> MediumYellow
+                            else -> CriticalRed
+                        },
+                        fontFamily = MonospaceFamily,
+                        fontSize = 10.sp,
+                        letterSpacing = 0.5.sp
+                    )
+                }
             }
         }
     }

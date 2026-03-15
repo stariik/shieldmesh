@@ -8,7 +8,7 @@ export default function ScanPage() {
       <div>
         <h2 className="text-xl font-semibold text-white mb-2">AI Threat Scanner</h2>
         <p className="text-sm text-gray-500">
-          Paste a URL, smart contract address, or suspicious message to analyze it for threats using the ShieldMesh neural detection engine.
+          Paste a URL, message, or upload a suspicious file to analyze for threats using the ShieldMesh neural detection engine.
         </p>
       </div>
 

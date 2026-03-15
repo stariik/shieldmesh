@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebarStore";
@@ -97,15 +98,18 @@ export default function Sidebar() {
       >
         <div className="p-6 border-b border-[#1a1a2e] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3" onClick={close}>
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#00ff88] to-[#00d4ff] flex items-center justify-center">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="ShieldMesh"
+              width={40}
+              height={40}
+              className="drop-shadow-[0_0_12px_rgba(0,255,136,0.2)]"
+            />
             <div>
-              <span className="text-lg font-bold text-white tracking-wide">Shield</span>
-              <span className="text-lg font-bold text-[#00ff88] tracking-wide">Mesh</span>
-              <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] -mt-1">Threat Intelligence</div>
+              <div className="text-lg font-black tracking-tight leading-tight">
+                <span className="text-white">Shield</span><span className="bg-gradient-to-r from-[#00ff88] to-[#00d4ff] bg-clip-text text-transparent">Mesh</span>
+              </div>
+              <div className="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-mono">Threat Intelligence</div>
             </div>
           </Link>
           {/* Close button for mobile */}

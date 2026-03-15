@@ -4,10 +4,89 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Outer glow ring -->
     <path
         android:fillColor="#00FF88"
-        android:pathData="M54,30L54,30A24,24 0,0 1,78 54L78,54A24,24 0,0 1,54 78L54,78A24,24 0,0 1,30 54L30,54A24,24 0,0 1,54 30z"/>
+        android:fillAlpha="0.12"
+        android:pathData="M54,20 L78,34 L78,62 L54,76 L30,62 L30,34 Z"/>
+
+    <!-- Shield body - hexagonal shape -->
     <path
-        android:fillColor="#0A0A0F"
-        android:pathData="M54,40l-12,20l6,0l-2,10l12,-16l-6,0l2,-14z"/>
+        android:fillColor="#00FF88"
+        android:pathData="M54,26 L73,37 L73,59 L54,70 L35,59 L35,37 Z"/>
+
+    <!-- Inner dark shield face -->
+    <path
+        android:fillColor="#060610"
+        android:pathData="M54,30 L69,39 L69,57 L54,66 L39,57 L39,39 Z"/>
+
+    <!-- Mesh network nodes and lines -->
+    <!-- Center node -->
+    <path
+        android:fillColor="#00FF88"
+        android:pathData="M54,48 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0"/>
+
+    <!-- Top node -->
+    <path
+        android:fillColor="#00D4FF"
+        android:pathData="M54,37 m-2.2,0 a2.2,2.2 0,1 1,4.4 0 a2.2,2.2 0,1 1,-4.4 0"/>
+
+    <!-- Bottom-left node -->
+    <path
+        android:fillColor="#00D4FF"
+        android:pathData="M45,55 m-2.2,0 a2.2,2.2 0,1 1,4.4 0 a2.2,2.2 0,1 1,-4.4 0"/>
+
+    <!-- Bottom-right node -->
+    <path
+        android:fillColor="#00D4FF"
+        android:pathData="M63,55 m-2.2,0 a2.2,2.2 0,1 1,4.4 0 a2.2,2.2 0,1 1,-4.4 0"/>
+
+    <!-- Connection lines -->
+    <!-- Center to top -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M54,45 L54,39"/>
+
+    <!-- Center to bottom-left -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M52,50 L47,53"/>
+
+    <!-- Center to bottom-right -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M56,50 L61,53"/>
+
+    <!-- Outer connection lines (dimmer) -->
+    <!-- Top to bottom-left -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.5"
+        android:fillColor="#00000000"
+        android:pathData="M52,39 L47,53"/>
+
+    <!-- Top to bottom-right -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.5"
+        android:fillColor="#00000000"
+        android:pathData="M56,39 L61,53"/>
+
+    <!-- Bottom-left to bottom-right -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.5"
+        android:fillColor="#00000000"
+        android:pathData="M47,55 L61,55"/>
+
 </vector>

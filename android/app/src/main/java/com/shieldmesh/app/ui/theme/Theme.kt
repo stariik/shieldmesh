@@ -12,14 +12,16 @@ import androidx.core.view.WindowCompat
 private val ShieldMeshColorScheme = darkColorScheme(
     primary = GreenAccent,
     onPrimary = DarkBackground,
-    primaryContainer = GreenAccent.copy(alpha = 0.15f),
+    primaryContainer = GreenAccent.copy(alpha = 0.12f),
     onPrimaryContainer = GreenAccent,
     secondary = CyanAccent,
     onSecondary = DarkBackground,
-    secondaryContainer = CyanAccent.copy(alpha = 0.15f),
+    secondaryContainer = CyanAccent.copy(alpha = 0.12f),
     onSecondaryContainer = CyanAccent,
     tertiary = PurpleAccent,
     onTertiary = DarkBackground,
+    tertiaryContainer = PurpleAccent.copy(alpha = 0.12f),
+    onTertiaryContainer = PurpleAccent,
     background = DarkBackground,
     onBackground = TextPrimary,
     surface = SurfaceDark,
@@ -27,9 +29,11 @@ private val ShieldMeshColorScheme = darkColorScheme(
     surfaceVariant = CardBackground,
     onSurfaceVariant = TextSecondary,
     outline = CardBorder,
-    outlineVariant = CardBorder.copy(alpha = 0.5f),
+    outlineVariant = CardBorderSubtle,
     error = CriticalRed,
-    onError = DarkBackground
+    onError = DarkBackground,
+    inverseSurface = TextPrimary,
+    inverseOnSurface = DarkBackground
 )
 
 @Composable
@@ -38,7 +42,7 @@ fun ShieldMeshTheme(content: @Composable () -> Unit) {
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = DarkBackground.toArgb()
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
             window.navigationBarColor = DarkBackground.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false

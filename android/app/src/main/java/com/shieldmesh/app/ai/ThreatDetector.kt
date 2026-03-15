@@ -340,6 +340,172 @@ class ThreatDetector @Inject constructor() {
     }
 
     // -----------------------------------------------------------------------
+    // File analysis
+    // -----------------------------------------------------------------------
+    fun analyzeFile(content: String, fileName: String, fileSize: Long): ThreatResult {
+        val indicators = mutableListOf<ThreatIndicator>()
+
+        analyzeFileName(fileName, indicators)
+        analyzeFileSize(fileSize, indicators)
+
+        if (content.isNotEmpty()) {
+            // Extract and scan URLs in the file
+            val urlPattern = Regex("https?://[^\\s<>\"'\\)\\]]+", RegexOption.IGNORE_CASE)
+            val urlMatches = urlPattern.findAll(content).map { it.value }.distinct().take(50).toList()
+            for (url in urlMatches) {
+                analyzeUrl(url, indicators)
+            }
+            if (urlMatches.size > 5) {
+                indicators.add(ThreatIndicator("File contains ${urlMatches.size} URLs -- bulk phishing or link farm", 15, IndicatorCategory.PHISHING))
+            }
+
+            // Run message analysis on content
+            analyzeMessage(content, indicators)
+
+            // File-specific content patterns
+            analyzeFileContent(content, indicators)
+        }
+
+        // Deduplicate
+        val seen = mutableSetOf<String>()
+        val unique = indicators.filter { ind ->
+            if (seen.contains(ind.label)) false
+            else { seen.add(ind.label); true }
+        }
+
+        val rawScore = unique.sumOf { it.weight }
+        val score = rawScore.coerceIn(0, 100)
+        val severity = scoreSeverity(score)
+        val safe = score < 35
+        val description = generateFileDescription(unique, score, fileName)
+
+        return ThreatResult(score, severity, unique, description, safe)
+    }
+
+    private fun analyzeFileName(fileName: String, out: MutableList<ThreatIndicator>) {
+        val lower = fileName.lowercase()
+        val parts = fileName.split(".")
+
+        // Double extension tricks
+        if (parts.size > 2) {
+            val lastExt = parts.last().lowercase()
+            val secondLastExt = parts[parts.size - 2].lowercase()
+            val execExtensions = setOf("exe", "bat", "cmd", "scr", "pif", "com", "vbs", "js", "ps1", "msi", "jar", "apk")
+            val docExtensions = setOf("pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "jpg", "png")
+            if (lastExt in execExtensions && secondLastExt in docExtensions) {
+                out.add(ThreatIndicator("Double extension trick: .$secondLastExt.$lastExt -- disguises executable as document", 30, IndicatorCategory.TECHNICAL))
+            }
+        }
+
+        // Dangerous file extensions
+        val dangerousExts = setOf("exe", "bat", "cmd", "scr", "pif", "com", "vbs", "vbe", "js", "jse", "wsf", "wsh", "ps1", "msi", "dll", "sys")
+        val ext = parts.lastOrNull()?.lowercase() ?: ""
+        if (ext in dangerousExts) {
+            out.add(ThreatIndicator("Dangerous file type (.$ext) -- executable or script", 25, IndicatorCategory.TECHNICAL))
+        }
+
+        // Macro-enabled Office documents
+        val macroExts = setOf("docm", "xlsm", "pptm", "dotm", "xltm")
+        if (ext in macroExts) {
+            out.add(ThreatIndicator("Macro-enabled Office document (.$ext) -- may contain malicious macros", 20, IndicatorCategory.TECHNICAL))
+        }
+
+        // Suspicious filename keywords
+        val suspiciousNames = listOf("invoice", "payment", "receipt", "urgent", "verify", "password", "login", "account", "security", "update", "confirm")
+        for (kw in suspiciousNames) {
+            if (lower.contains(kw)) {
+                out.add(ThreatIndicator("Suspicious filename keyword: \"$kw\" -- common in phishing attachments", 8, IndicatorCategory.SOCIAL_ENGINEERING))
+                break
+            }
+        }
+    }
+
+    private fun analyzeFileSize(fileSize: Long, out: MutableList<ThreatIndicator>) {
+        if (fileSize in 1..9999) {
+            out.add(ThreatIndicator("Very small file -- could be a dropper or downloader stub", 6, IndicatorCategory.TECHNICAL))
+        }
+    }
+
+    private fun analyzeFileContent(content: String, out: MutableList<ThreatIndicator>) {
+        val lower = content.lowercase()
+
+        // Base64 encoded blobs
+        val base64Pattern = Regex("[A-Za-z0-9+/]{50,}={0,2}")
+        val base64Matches = base64Pattern.findAll(content).toList()
+        if (base64Matches.isNotEmpty()) {
+            out.add(ThreatIndicator("Base64-encoded data detected (${base64Matches.size} block${if (base64Matches.size > 1) "s" else ""}) -- possible obfuscated payload", 12, IndicatorCategory.TECHNICAL))
+        }
+
+        // Script tags / HTML injection
+        if (Regex("<script[\\s>]", RegexOption.IGNORE_CASE).containsMatchIn(content)) {
+            out.add(ThreatIndicator("Embedded <script> tag -- potential XSS or malicious code injection", 18, IndicatorCategory.TECHNICAL))
+        }
+
+        // PowerShell commands
+        if (Regex("powershell|invoke-expression|invoke-webrequest|downloadstring|iex\\s*\\(", RegexOption.IGNORE_CASE).containsMatchIn(content)) {
+            out.add(ThreatIndicator("PowerShell command detected -- possible remote code execution", 25, IndicatorCategory.TECHNICAL))
+        }
+
+        // Shell commands
+        if (Regex("\\bcurl\\s+.*https?:|wget\\s+.*https?:|bash\\s+-c\\s|/bin/sh", RegexOption.IGNORE_CASE).containsMatchIn(content)) {
+            out.add(ThreatIndicator("Shell download command detected -- potential dropper payload", 22, IndicatorCategory.TECHNICAL))
+        }
+
+        // Multiple Solana-like addresses
+        val solAddrs = Regex("[1-9A-HJ-NP-Za-km-z]{32,44}").findAll(content).toList()
+        if (solAddrs.size > 3) {
+            out.add(ThreatIndicator("Multiple Solana-like addresses found (${solAddrs.size}) -- possible address swap list", 15, IndicatorCategory.CRYPTO_SCAM))
+        }
+
+        // Private key patterns
+        if (content.contains("-----BEGIN") && content.contains("PRIVATE KEY-----")) {
+            out.add(ThreatIndicator("Possible private key material in file", 20, IndicatorCategory.CRYPTO_SCAM))
+        }
+
+        // Obfuscated JavaScript
+        if (Regex("eval\\s*\\(|document\\.write\\s*\\(|unescape\\s*\\(|atob\\s*\\(|String\\.fromCharCode", RegexOption.IGNORE_CASE).containsMatchIn(content)) {
+            out.add(ThreatIndicator("JavaScript obfuscation pattern -- eval/unescape/fromCharCode", 15, IndicatorCategory.TECHNICAL))
+        }
+    }
+
+    private fun generateFileDescription(
+        indicators: List<ThreatIndicator>,
+        score: Int,
+        fileName: String
+    ): String {
+        if (indicators.isEmpty()) {
+            return "File analysis complete for \"$fileName\". No significant threat indicators were identified."
+        }
+
+        val categoryCount = mutableMapOf<IndicatorCategory, Int>()
+        for (ind in indicators) {
+            categoryCount[ind.category] = (categoryCount[ind.category] ?: 0) + 1
+        }
+
+        val parts = mutableListOf<String>()
+
+        when {
+            score >= 80 -> parts.add("CRITICAL THREAT DETECTED in file \"$fileName\".")
+            score >= 60 -> parts.add("High-confidence threat indicators found in \"$fileName\".")
+            score >= 35 -> parts.add("Moderate risk -- \"$fileName\" contains suspicious content.")
+            else -> parts.add("Low risk -- \"$fileName\" has minor anomalies.")
+        }
+
+        categoryCount[IndicatorCategory.PHISHING]?.let { parts.add("Phishing analysis flagged $it indicator${if (it > 1) "s" else ""}.") }
+        categoryCount[IndicatorCategory.SOCIAL_ENGINEERING]?.let { parts.add("Social engineering patterns detected ($it).") }
+        categoryCount[IndicatorCategory.CRYPTO_SCAM]?.let { parts.add("Crypto threat patterns found ($it).") }
+        categoryCount[IndicatorCategory.TECHNICAL]?.let { parts.add("Technical analysis identified $it anomal${if (it > 1) "ies" else "y"}.") }
+
+        if (score >= 60) {
+            parts.add("Recommendation: Do NOT open or execute this file. Report to ShieldMesh.")
+        } else if (score >= 35) {
+            parts.add("Recommendation: Exercise caution. Verify the source before opening.")
+        }
+
+        return parts.joinToString(" ")
+    }
+
+    // -----------------------------------------------------------------------
     // Scoring
     // -----------------------------------------------------------------------
     private fun scoreSeverity(score: Int): Severity = when {
